@@ -42,12 +42,7 @@ repository. Register a new document here when it is added or moved (see
 | Document | Purpose |
 | --- | --- |
 | `README.md` | Explains what belongs in this folder and when a ticket needs its own manifest file. |
-
-## Not yet created
-
-| Document | Status |
-| --- | --- |
-| `AUTO-BACKFILL-UI_PLAN.md` | Requested by the Product Owner as an example of the "backend-first, UI-second" principle, but its source content/link was not provided and its filename is tied to a specific ticket from the prior project. Needs either the source link or a new name/purpose confirmed by the Product Owner before authoring. |
+| `PRICING_MAPPING_BACKEND_FIRST_PLAN.md` | Backend-first/UI-second example plan (renamed from the prior project's `AUTO-BACKFILL-UI_PLAN.md`, see `PROJECT_DECISIONS.md` `DEC-008`), using Module Phát's real pricing/mapping backend as the worked example. Phase A retrospective (done), Phase B (pricing config UI) proposed only. |
 
 ## Maintenance rule
 

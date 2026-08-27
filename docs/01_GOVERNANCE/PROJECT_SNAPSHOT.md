@@ -65,12 +65,15 @@ keep the full governance folder structure (`docs/01_GOVERNANCE/`,
 `docs/06_REVIEWS/`, `docs/10_TICKETS/`) despite the smaller team, so the
 supporting documents these core files reference (`DOCUMENT_INDEX.md`,
 `PROJECT_DECISIONS.md`, `PROJECT_CONTEXT.md`, etc.) were created too,
-rather than leaving dangling links. One file from the original 8-file
-request, `AUTO-BACKFILL-UI_PLAN.md`, was intentionally **not** created in
-this pass — its content wasn't provided and its filename is tied to a
-specific ticket from the old project; it needs either the source link or
-an explicit new name/purpose from the Product Owner before it is
-authored, rather than being guessed. `CODEX_DOCUMENTATION_STANDARD.md`
+rather than leaving dangling links. The 8th file from the original
+request, `AUTO-BACKFILL-UI_PLAN.md`, was initially deferred pending its
+source link; the Product Owner then provided it. Its content (a 2-phase
+backend-then-UI plan for a KPI backfill feature) doesn't transfer
+literally, so it was recreated as
+`docs/10_TICKETS/PRICING_MAPPING_BACKEND_FIRST_PLAN.md` (`DEC-008`,
+proposed), illustrating the same principle with Module Phát's real
+pricing/mapping backend as the worked example instead.
+`CODEX_DOCUMENTATION_STANDARD.md`
 was renamed to `DEVELOPE_DOCUMENTATION_STANDARD.md` for naming
 consistency with the Product-Owner-requested rename of
 `CODEX_PROMPT_STANDARD.md` → `DEVELOPE_PROMT_STANDARD.md` — this second

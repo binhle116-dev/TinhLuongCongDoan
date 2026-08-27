@@ -35,5 +35,9 @@ record (do not delete it) — update its status field to `CLOSED` and
 update `docs/01_GOVERNANCE/PROJECT_SNAPSHOT.md` plus
 `PROJECT_PROGRESS.md` per the standard handoff.
 
-This folder is currently empty — no ticket has needed a dedicated
-manifest yet (see `PROJECT_SNAPSHOT.md`: `Current Ticket = None`).
+No active ticket currently needs a manifest (see `PROJECT_SNAPSHOT.md`:
+`Current Ticket = None`). This folder does hold one example plan,
+`PRICING_MAPPING_BACKEND_FIRST_PLAN.md`, illustrating the backend-first/
+UI-second principle with Module Phát's real pricing/mapping work — read
+it as a worked example of what a manifest/plan document looks like when
+one is warranted.
