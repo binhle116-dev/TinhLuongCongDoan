@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="vi">
+<head><meta charset="utf-8"><title>Dang nhap - Tinh luong Cong doan</title>
+<style>
+body { font-family: "Segoe UI", Arial, sans-serif; background: #1a365d; height: 100vh; display: flex; align-items: center; justify-content: center; margin: 0; }
+.box { background: #fff; padding: 32px; border-radius: 8px; width: 320px; box-shadow: 0 2px 12px rgba(0,0,0,.3); }
+h1 { font-size: 18px; margin-top: 0; }
+input { width: 100%; padding: 8px; margin: 6px 0 14px; box-sizing: border-box; }
+button { width: 100%; padding: 10px; background: #2c5282; color: #fff; border: none; border-radius: 4px; cursor: pointer; }
+.errorlist { color: #c53030; font-size: 13px; }
+</style>
+</head>
+<body>
+<div class="box">
+  <h1>Tinh luong Cong doan Phat</h1>
+  <form method="post">
+    {% csrf_token %}
+    {{ form.non_field_errors }}
+    <label>Tai khoan</label>
+    {{ form.username }}
+    {{ form.username.errors }}
+    <label>Mat khau</label>
+    {{ form.password }}
+    {{ form.password.errors }}
+    <button type="submit">Dang nhap</button>
+  </form>
+</div>
+</body>
+</html>

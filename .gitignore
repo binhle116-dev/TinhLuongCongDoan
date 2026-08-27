@@ -1,0 +1,26 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Django
+db.sqlite3
+db.sqlite3-*
+staticfiles/
+media/
+
+# Project-specific runtime artifacts
+backups/
+scripts/pull_log.txt
+
+# Env / secrets
+.env
+*.local
+
+# OS
+Thumbs.db
+.DS_Store
+
+# Editor
+.vscode/
+.idea/

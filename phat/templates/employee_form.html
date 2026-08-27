@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block title %}Nhan vien{% endblock %}
+{% block content %}
+<h1>{% if instance %}Sua nhan vien{% else %}Them nhan vien{% endif %}</h1>
+<form method="post">
+  {% csrf_token %}
+  {{ form.as_p }}
+  <button class="btn" type="submit">Luu</button>
+  <a href="{% url 'employee_list' %}">Huy</a>
+</form>
+{% endblock %}

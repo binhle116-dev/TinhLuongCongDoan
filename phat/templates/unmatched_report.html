@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}Chua anh xa{% endblock %}
+{% block content %}
+<h1>Bao cao du lieu chua anh xa duoc</h1>
+<p class="note">Dung trang nay de biet con thieu quy tac anh xa dich vu (Quan tri &rarr; Bang anh xa dich vu) hoac
+con thieu nhan vien (chua co Ma buu ta trong danh sach nhan vien).</p>
+
+<h2>Chua xac dinh duoc loai dich vu chuan ({{ unmatched|length }} to hop)</h2>
+<table>
+<thead><tr><th class="text">SERVICE_CODE</th><th class="text">TYPE_CODE_PAYROLL</th><th class="text">SERVICE_NAME_PAYROLL</th><th class="text">AREA_CODE</th><th>Tong so luong</th></tr></thead>
+<tbody>
+{% for u in unmatched %}
+<tr>
+  <td class="text">{{ u.service_code }}</td>
+  <td class="text">{{ u.type_code_payroll }}</td>
+  <td class="text">{{ u.service_name_payroll }}</td>
+  <td class="text">{{ u.area_code }}</td>
+  <td>{{ u.so_dong|floatformat:0 }}</td>
+</tr>
+{% empty %}
+<tr><td colspan="5" class="text"><i>Khong co - tat ca da anh xa duoc.</i></td></tr>
+{% endfor %}
+</tbody>
+</table>
+
+<h2>Chua khop duoc voi nhan vien nao (theo Ma buu ta)</h2>
+<table>
+<thead><tr><th class="text">POSTMAN_CODE</th></tr></thead>
+<tbody>
+{% for u in unmatched_employee %}
+<tr><td class="text">{{ u.postman_code }}</td></tr>
+{% empty %}
+<tr><td class="text"><i>Khong co - tat ca da khop duoc.</i></td></tr>
+{% endfor %}
+</tbody>
+</table>
+{% endblock %}

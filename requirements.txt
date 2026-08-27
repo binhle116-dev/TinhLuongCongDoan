@@ -1,0 +1,5 @@
+django
+waitress
+django-import-export
+pandas
+openpyxl

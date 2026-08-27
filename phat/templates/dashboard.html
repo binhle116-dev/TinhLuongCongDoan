@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}Trang chu{% endblock %}
+{% block content %}
+<h1>Tong quan thang {{ month }}/{{ year }}</h1>
+
+{% if not run %}
+<div class="warn">Chua co du lieu tinh luong cho thang nay. Hay import du lieu san luong hang ngay truoc.</div>
+{% else %}
+<div class="warn">TAM TINH - CHUA XAC MINH. So lieu cap nhat den lan import gan nhat, chua phai luong chinh thuc.</div>
+{% endif %}
+
+<div class="card">
+  <table>
+    <tr><td class="text">So lao dong co du lieu</td><td>{{ employee_count }}</td></tr>
+    <tr><td class="text">Cong theo san luong (tam tinh)</td><td>{{ totals.piece_rate|default:0|floatformat:0 }}</td></tr>
+    <tr><td class="text">Tong ho tro</td><td>{{ totals.allowance|default:0|floatformat:0 }}</td></tr>
+    <tr class="total"><td class="text">Tong thu nhap</td><td>{{ totals.total|default:0|floatformat:0 }}</td></tr>
+  </table>
+</div>
+
+<p><a class="btn" href="{% url 'payroll_detail' year month %}">Xem chi tiet thang nay</a></p>
+
+{% if last_batch %}
+<h2>Lan import gan nhat</h2>
+<p class="note">
+  File: {{ last_batch.source_filename }} - Ngay du lieu: {{ last_batch.production_date }} -
+  {{ last_batch.row_count }} dong, {{ last_batch.unmatched_count }} dong chua anh xa duoc
+  ({{ last_batch.created_at }})
+</p>
+{% endif %}
+{% endblock %}

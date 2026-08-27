@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}Khoan ho tro{% endblock %}
+{% block content %}
+<h1>Khoan ho tro/co dinh - Thang {{ month }}/{{ year }}</h1>
+<form method="get" style="margin-bottom:12px">
+  <label>Nam</label><input type="number" name="year" value="{{ year }}">
+  <label>Thang</label><input type="number" name="month" value="{{ month }}">
+  <button class="btn" type="submit">Xem</button>
+</form>
+<p><a class="btn" href="{% url 'allowance_create' %}">+ Them khoan ho tro</a></p>
+<table>
+<thead><tr><th class="text">Nhan vien</th><th class="text">Loai khoan</th><th>So luong</th><th>Don gia</th><th>Thanh tien</th><th></th></tr></thead>
+<tbody>
+{% for e in entries %}
+<tr>
+  <td class="text">{{ e.employee }}</td>
+  <td class="text">{{ e.allowance_type }}</td>
+  <td>{{ e.quantity }}</td>
+  <td>{{ e.unit_price|default:"-" }}</td>
+  <td>{{ e.amount|floatformat:0 }}</td>
+  <td><a href="{% url 'allowance_edit' e.pk %}">Sua</a></td>
+</tr>
+{% empty %}
+<tr><td colspan="6" class="text"><i>Chua co khoan ho tro nao thang nay.</i></td></tr>
+{% endfor %}
+</tbody>
+</table>
+{% endblock %}

@@ -1,0 +1,9 @@
+option batch abort
+option confirm off
+option transfer binary
+open CAS_Hue_SFTP
+cd "/SLP Chitiet"
+lcd "D:\ONEDRIVE\Trung tam Van hanh - BDTP Hue 05.2025\2026\San luong tinh luong cac cong doan\San luong phat"
+get -neweronly "SanLuongChiTiet_*.xlsx"
+close
+exit
