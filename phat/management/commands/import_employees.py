@@ -144,18 +144,31 @@ class Command(BaseCommand):
             self.stdout.write(self.style.SUCCESS(f"Da bo sung Ma buu ta cho {n} nhan vien."))
 
     def _backfill_postman_code(self, path: Path) -> int:
+        """Doc sheet 'mã BT' (Ma HRM/Ma buu ta/Ten buu ta) tu 1 file
+        BatchFile cu (.xlsb) de bo sung Ma buu ta con thieu.
+
+        GHI CHU QUAN TRONG (phat hien 2026-08-27, xem PROJECT_DECISIONS.md
+        DEC-011): ma buu ta co the thay doi theo thoi gian (doi tuyen).
+        Ban dau dung sheet 'TH-TP-Chot' cua file thang 03/2026 de bo sung,
+        nhung sau doi chieu voi du lieu that thang 08/2026 phat hien 7
+        truong hop ma da loi thoi (khong con xuat hien trong du lieu that,
+        trong khi ten nguoi van dung o 1 ma KHAC). Sheet 'mã BT' cua file
+        thang 04/2026 (gan voi hien tai hon) da duoc doi chieu lai bang
+        ten va khop dung 100% (115/115) - nen dung sheet nay lam nguon
+        chuan thay vi 'TH-TP-Chot'. Neu nghi ngo du lieu lai loi thoi lan
+        nua, doi chieu ten (khong chi ma) truoc khi tin tuong."""
         import pyxlsb
 
         mapping = {}
         with pyxlsb.open_workbook(str(path)) as wb:
-            with wb.get_sheet("TH-TP-Chốt") as sheet:
+            with wb.get_sheet("mã BT") as sheet:
                 for i, row in enumerate(sheet.rows()):
                     if i < 3:
                         continue
                     vals = [c.v for c in row]
-                    if len(vals) < 6 or not vals[4] or not vals[5]:
+                    if len(vals) < 5 or not vals[3] or not vals[4]:
                         continue
-                    mapping[normalize_hrm(vals[4])] = str(vals[5]).strip()
+                    mapping[normalize_hrm(vals[3])] = str(vals[4]).strip()
 
         n = 0
         for emp in Employee.objects.filter(postman_code=""):
