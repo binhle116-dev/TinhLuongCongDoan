@@ -1,17 +1,27 @@
 {% extends "base.html" %}
-{% block title %}Chi tiet luong{% endblock %}
+{% block title %}Lương{% endblock %}
+{% block page_title %}Lương công đoạn Phát — Tháng {{ month }}/{{ year }}{% endblock %}
 {% block content %}
-<h1>Chi tiet luong Cong doan Phat - Thang {{ month }}/{{ year }}</h1>
 
 {% if is_provisional %}
-<div class="warn"><b>TAM TINH - CHUA XAC MINH.</b> So lieu tinh tu du lieu san luong hang ngay, dang cho xac nhan chinh thuc truoc khi chi tra.</div>
+<div class="warn"><b>TẠM TÍNH — CHƯA XÁC MINH.</b> Số liệu tính từ dữ liệu sản lượng hàng ngày, đang chờ xác nhận chính thức trước khi chi trả.</div>
 {% endif %}
 
-<p><a class="btn" href="{% url 'export_excel' year month %}">Xuat Excel</a></p>
+<form method="get" class="filter-bar">
+  <label>Bưu cục</label>
+  <select name="bc" onchange="this.form.submit()">
+    <option value="">Tất cả bưu cục</option>
+    {% for o in office_choices %}
+      <option value="{{ o.code }}" {% if o.code == selected_office %}selected{% endif %}>{{ o.code }} - {{ o.name }}</option>
+    {% endfor %}
+  </select>
+  <a class="btn secondary" href="{% url 'export_excel' year month %}{% if selected_office %}?bc={{ selected_office }}{% endif %}">Xuất Excel</a>
+</form>
 
-<h2>Theo buu cuc</h2>
+<h2>Theo bưu cục</h2>
+<div class="table-wrap">
 <table>
-<thead><tr><th class="text">Ma BC</th><th class="text">Ten BC</th><th>So lao dong</th><th>Cong san luong</th><th>Ho tro</th><th>Tong</th></tr></thead>
+<thead><tr><th class="text">Mã BC</th><th class="text">Tên BC</th><th>Số lao động</th><th>Công sản lượng</th><th>Hỗ trợ</th><th>Tổng</th></tr></thead>
 <tbody>
 {% for o in by_office %}
 <tr>
@@ -23,14 +33,16 @@
   <td>{{ o.total|floatformat:0 }}</td>
 </tr>
 {% empty %}
-<tr><td colspan="6" class="text"><i>Chua co du lieu.</i></td></tr>
+<tr><td colspan="6" class="text"><i>Chưa có dữ liệu.</i></td></tr>
 {% endfor %}
 </tbody>
 </table>
+</div>
 
-<h2>Chi tiet theo lao dong</h2>
+<h2>Chi tiết theo lao động{% if selected_office %} — {{ selected_office }}{% endif %}</h2>
+<div class="table-wrap">
 <table>
-<thead><tr><th class="text">Ma HRM</th><th class="text">Ho ten</th><th class="text">Buu cuc</th><th>Cong san luong</th><th>Ho tro</th><th>Tong</th></tr></thead>
+<thead><tr><th class="text">Mã HRM</th><th class="text">Họ tên</th><th class="text">Bưu cục</th><th>Công sản lượng</th><th>Hỗ trợ</th><th>Tổng</th></tr></thead>
 <tbody>
 {% for p in pays %}
 <tr>
@@ -42,8 +54,9 @@
   <td>{{ p.total_amount|floatformat:0 }}</td>
 </tr>
 {% empty %}
-<tr><td colspan="6" class="text"><i>Chua co du lieu.</i></td></tr>
+<tr><td colspan="6" class="text"><i>Chưa có dữ liệu.</i></td></tr>
 {% endfor %}
 </tbody>
 </table>
+</div>
 {% endblock %}

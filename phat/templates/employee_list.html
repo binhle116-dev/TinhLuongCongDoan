@@ -1,23 +1,26 @@
 {% extends "base.html" %}
-{% block title %}Nhan vien{% endblock %}
+{% block title %}Nhân viên{% endblock %}
+{% block page_title %}Nhân viên{% endblock %}
 {% block content %}
-<h1>Danh sach nhan vien</h1>
-<p><a class="btn" href="{% url 'employee_create' %}">+ Them nhan vien</a></p>
+<p><a class="btn" href="{% url 'employee_create' %}">+ Thêm nhân viên</a></p>
+<div class="table-wrap">
 <table>
-<thead><tr><th>Ma HRM</th><th>Ma buu ta</th><th class="text">Ho ten</th><th class="text">Buu cuc</th><th>Loai HD</th><th></th></tr></thead>
+<thead><tr><th class="text">Mã HRM</th><th class="text">Mã bưu tá</th><th class="text">Họ tên</th><th class="text">Bưu cục</th><th class="text">Loại HĐ</th><th class="text">Trạng thái</th><th></th></tr></thead>
 <tbody>
 {% for e in employees %}
 <tr>
-  <td>{{ e.hrm_code }}</td>
-  <td>{{ e.postman_code }}</td>
+  <td class="text">{{ e.hrm_code }}</td>
+  <td class="text">{{ e.postman_code }}</td>
   <td class="text">{{ e.full_name }}</td>
   <td class="text">{{ e.post_office }}</td>
-  <td>{{ e.get_contract_type_display }}</td>
-  <td><a href="{% url 'employee_edit' e.pk %}">Sua</a></td>
+  <td class="text">{{ e.get_contract_type_display }}</td>
+  <td class="text">{% if e.is_active %}Đang làm việc{% else %}<span style="color:#b23">Ngừng hoạt động</span>{% endif %}</td>
+  <td><a href="{% url 'employee_edit' e.pk %}">Sửa</a></td>
 </tr>
 {% empty %}
-<tr><td colspan="6" class="text"><i>Chua co nhan vien nao.</i></td></tr>
+<tr><td colspan="7" class="text"><i>Chưa có nhân viên nào.</i></td></tr>
 {% endfor %}
 </tbody>
 </table>
+</div>
 {% endblock %}

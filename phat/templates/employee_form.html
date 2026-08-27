@@ -1,11 +1,13 @@
 {% extends "base.html" %}
-{% block title %}Nhan vien{% endblock %}
+{% block title %}Nhân viên{% endblock %}
+{% block page_title %}{% if instance %}Sửa nhân viên{% else %}Thêm nhân viên{% endif %}{% endblock %}
 {% block content %}
-<h1>{% if instance %}Sua nhan vien{% else %}Them nhan vien{% endif %}</h1>
+<div class="card" style="max-width:560px">
 <form method="post">
   {% csrf_token %}
   {{ form.as_p }}
-  <button class="btn" type="submit">Luu</button>
-  <a href="{% url 'employee_list' %}">Huy</a>
+  <button class="btn" type="submit">Lưu</button>
+  <a class="btn secondary" href="{% url 'employee_list' %}">Hủy</a>
 </form>
+</div>
 {% endblock %}

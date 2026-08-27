@@ -1,13 +1,14 @@
 {% extends "base.html" %}
-{% block title %}Chua anh xa{% endblock %}
+{% block title %}Chưa ánh xạ{% endblock %}
+{% block page_title %}Dữ liệu chưa ánh xạ được{% endblock %}
 {% block content %}
-<h1>Bao cao du lieu chua anh xa duoc</h1>
-<p class="note">Dung trang nay de biet con thieu quy tac anh xa dich vu (Quan tri &rarr; Bang anh xa dich vu) hoac
-con thieu nhan vien (chua co Ma buu ta trong danh sach nhan vien).</p>
+<p class="note">Dùng trang này để biết còn thiếu quy tắc ánh xạ dịch vụ (Quản trị → Bảng ánh xạ dịch vụ) hoặc
+còn thiếu nhân viên (chưa có Mã bưu tá trong danh sách nhân viên).</p>
 
-<h2>Chua xac dinh duoc loai dich vu chuan ({{ unmatched|length }} to hop)</h2>
+<h2>Chưa xác định được loại dịch vụ chuẩn ({{ unmatched|length }} tổ hợp)</h2>
+<div class="table-wrap">
 <table>
-<thead><tr><th class="text">SERVICE_CODE</th><th class="text">TYPE_CODE_PAYROLL</th><th class="text">SERVICE_NAME_PAYROLL</th><th class="text">AREA_CODE</th><th>Tong so luong</th></tr></thead>
+<thead><tr><th class="text">SERVICE_CODE</th><th class="text">TYPE_CODE_PAYROLL</th><th class="text">SERVICE_NAME_PAYROLL</th><th class="text">AREA_CODE</th><th>Tổng số lượng</th></tr></thead>
 <tbody>
 {% for u in unmatched %}
 <tr>
@@ -18,20 +19,23 @@ con thieu nhan vien (chua co Ma buu ta trong danh sach nhan vien).</p>
   <td>{{ u.so_dong|floatformat:0 }}</td>
 </tr>
 {% empty %}
-<tr><td colspan="5" class="text"><i>Khong co - tat ca da anh xa duoc.</i></td></tr>
+<tr><td colspan="5" class="text"><i>Không có — tất cả đã ánh xạ được.</i></td></tr>
 {% endfor %}
 </tbody>
 </table>
+</div>
 
-<h2>Chua khop duoc voi nhan vien nao (theo Ma buu ta)</h2>
+<h2>Chưa khớp được với nhân viên nào (theo Mã bưu tá)</h2>
+<div class="table-wrap">
 <table>
 <thead><tr><th class="text">POSTMAN_CODE</th></tr></thead>
 <tbody>
 {% for u in unmatched_employee %}
 <tr><td class="text">{{ u.postman_code }}</td></tr>
 {% empty %}
-<tr><td class="text"><i>Khong co - tat ca da khop duoc.</i></td></tr>
+<tr><td class="text"><i>Không có — tất cả đã khớp được.</i></td></tr>
 {% endfor %}
 </tbody>
 </table>
+</div>
 {% endblock %}

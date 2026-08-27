@@ -9,7 +9,7 @@ from django.db.models import Count, Sum
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 
-from core.models import Employee
+from core.models import Employee, PostOffice
 from core.permissions import get_profile, scope_queryset, user_scope_post_office
 from phat.forms import AllowanceEntryForm, EmployeeForm
 from phat.models import (
@@ -115,9 +115,15 @@ def allowance_edit(request, pk=None):
 def payroll_detail(request, year, month):
     run = MonthlyPayrollRun.objects.filter(year=year, month=month).first()
     pays = EmployeeMonthlyPay.objects.filter(run=run) if run else EmployeeMonthlyPay.objects.none()
-    pays = scope_queryset(pays, request.user, field_name="employee__post_office").select_related(
-        "employee", "employee__post_office"
-    ).order_by("-total_amount")
+    pays = scope_queryset(pays, request.user, field_name="employee__post_office")
+
+    # Danh sach BCVH cho bo loc - chi trong pham vi nguoi dung duoc xem.
+    office_choices = scope_queryset(PostOffice.objects.all(), request.user).order_by("code")
+    selected_office = request.GET.get("bc", "")
+    if selected_office:
+        pays = pays.filter(employee__post_office__code=selected_office)
+
+    pays = pays.select_related("employee", "employee__post_office").order_by("-total_amount")
 
     by_office = (
         pays.values("employee__post_office__code", "employee__post_office__name")
@@ -136,6 +142,8 @@ def payroll_detail(request, year, month):
         "run": run,
         "pays": pays,
         "by_office": by_office,
+        "office_choices": office_choices,
+        "selected_office": selected_office,
         "is_provisional": (not run) or (not run.is_finalized()),
     }
     return render(request, "payroll_detail.html", context)
@@ -145,9 +153,13 @@ def payroll_detail(request, year, month):
 def export_excel(request, year, month):
     run = MonthlyPayrollRun.objects.filter(year=year, month=month).first()
     pays = EmployeeMonthlyPay.objects.filter(run=run) if run else EmployeeMonthlyPay.objects.none()
-    pays = scope_queryset(pays, request.user, field_name="employee__post_office").select_related(
-        "employee", "employee__post_office"
-    ).order_by("employee__post_office__code", "-total_amount")
+    pays = scope_queryset(pays, request.user, field_name="employee__post_office")
+    selected_office = request.GET.get("bc", "")
+    if selected_office:
+        pays = pays.filter(employee__post_office__code=selected_office)
+    pays = pays.select_related("employee", "employee__post_office").order_by(
+        "employee__post_office__code", "-total_amount"
+    )
 
     wb = openpyxl.Workbook()
     ws = wb.active

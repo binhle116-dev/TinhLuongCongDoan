@@ -2,60 +2,244 @@
 <html lang="vi">
 <head>
 <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{% block title %}Tinh luong Cong doan{% endblock %}</title>
 <style>
-body { font-family: "Segoe UI", Arial, sans-serif; margin: 0; background: #f4f5f7; color: #1a1a1a; }
-header { background: #1a365d; color: #fff; padding: 12px 24px; display: flex; justify-content: space-between; align-items: center; }
-header a { color: #fff; text-decoration: none; margin-right: 16px; }
-header a:hover { text-decoration: underline; }
-main { padding: 20px 24px; max-width: 1200px; margin: 0 auto; }
-h1 { font-size: 22px; }
-h2 { font-size: 18px; margin-top: 24px; }
-table { border-collapse: collapse; width: 100%; margin-top: 8px; font-size: 14px; background: #fff; }
-th, td { border: 1px solid #ddd; padding: 6px 10px; text-align: right; }
-th { background: #eef1f5; text-align: center; }
+:root {
+  --sidebar-bg: #182634;
+  --sidebar-bg-active: #24384a;
+  --sidebar-text: #a9b8c7;
+  --sidebar-text-active: #ffffff;
+  --accent: #2f7de1;
+  --accent-dark: #2360b3;
+  --page-bg: #eef1f5;
+  --card-bg: #ffffff;
+  --border: #dde3ea;
+  --text: #1f2a37;
+  --text-muted: #6b7684;
+  --warn-bg: #fff8e6;
+  --warn-border: #f0c34d;
+  --warn-text: #8a5a00;
+  --ok-bg: #e8f7ee;
+  --ok-border: #35b56a;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  font-family: "Segoe UI", -apple-system, BlinkMacSystemFont, Arial, sans-serif;
+  background: var(--page-bg);
+  color: var(--text);
+  display: flex;
+  min-height: 100vh;
+}
+
+/* ---------- Sidebar ---------- */
+.sidebar {
+  width: 240px;
+  flex-shrink: 0;
+  background: var(--sidebar-bg);
+  color: var(--sidebar-text);
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  top: 0; bottom: 0; left: 0;
+  overflow-y: auto;
+}
+.sidebar-brand {
+  padding: 20px 20px 16px;
+  font-size: 16px;
+  font-weight: 600;
+  color: #fff;
+  border-bottom: 1px solid rgba(255,255,255,.08);
+}
+.sidebar-brand small {
+  display: block;
+  font-weight: 400;
+  font-size: 11px;
+  color: var(--sidebar-text);
+  margin-top: 2px;
+}
+.sidebar-section {
+  padding: 14px 20px 6px;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  color: #63758a;
+}
+.sidebar-nav { list-style: none; margin: 0; padding: 0 10px; }
+.sidebar-nav li { margin: 2px 0; }
+.sidebar-nav a, .sidebar-nav span.disabled {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 12px;
+  border-radius: 6px;
+  color: var(--sidebar-text);
+  text-decoration: none;
+  font-size: 14px;
+}
+.sidebar-nav a:hover { background: var(--sidebar-bg-active); color: var(--sidebar-text-active); }
+.sidebar-nav a.active { background: var(--accent); color: #fff; }
+.sidebar-nav span.disabled { color: #4c5c6d; cursor: default; }
+.sidebar-nav .icon { width: 18px; text-align: center; font-size: 14px; }
+.sidebar-footer {
+  margin-top: auto;
+  padding: 14px 20px;
+  border-top: 1px solid rgba(255,255,255,.08);
+  font-size: 13px;
+}
+.sidebar-footer .user { color: #fff; margin-bottom: 8px; word-break: break-all; }
+.sidebar-footer .role { color: var(--sidebar-text); font-size: 12px; margin-bottom: 10px; }
+.sidebar-footer button {
+  width: 100%;
+  padding: 7px;
+  background: transparent;
+  border: 1px solid rgba(255,255,255,.2);
+  color: var(--sidebar-text);
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+}
+.sidebar-footer button:hover { background: rgba(255,255,255,.08); color: #fff; }
+
+/* ---------- Main content ---------- */
+.main {
+  margin-left: 240px;
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+.topbar {
+  background: var(--card-bg);
+  border-bottom: 1px solid var(--border);
+  padding: 14px 28px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.topbar h1 { font-size: 19px; margin: 0; font-weight: 600; }
+.content { padding: 24px 28px; max-width: 1280px; width: 100%; }
+
+/* ---------- Components ---------- */
+.card {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 18px 20px;
+  margin-bottom: 18px;
+}
+h2 { font-size: 16px; margin: 24px 0 10px; font-weight: 600; }
+table { border-collapse: collapse; width: 100%; font-size: 13.5px; background: var(--card-bg); }
+th, td { border-bottom: 1px solid var(--border); padding: 8px 10px; text-align: right; }
+th { background: #f5f7fa; text-align: center; font-weight: 600; color: var(--text-muted); font-size: 12px; text-transform: uppercase; letter-spacing: .02em; }
 td.text { text-align: left; }
-tr.total td { font-weight: bold; background: #f0f0f0; }
-.btn { display: inline-block; padding: 6px 14px; background: #2c5282; color: #fff; text-decoration: none; border-radius: 4px; border: none; cursor: pointer; font-size: 14px; }
-.btn:hover { background: #1a365d; }
-.card { background: #fff; border-radius: 6px; padding: 16px; margin-bottom: 16px; box-shadow: 0 1px 2px rgba(0,0,0,.08); }
-.warn { color: #9c4221; background: #fffaf0; border: 1px solid #f6ad55; padding: 10px 14px; border-radius: 4px; margin-bottom: 12px; }
-.note { color: #555; font-size: 13px; }
+tr:hover td { background: #f8fafc; }
+tr.total td { font-weight: 700; background: #f0f4f8; }
+.table-wrap { overflow-x: auto; border: 1px solid var(--border); border-radius: 10px; }
+.table-wrap table { border: none; }
+.table-wrap tr:last-child td { border-bottom: none; }
+
+.btn {
+  display: inline-block;
+  padding: 8px 16px;
+  background: var(--accent);
+  color: #fff;
+  text-decoration: none;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  font-size: 13.5px;
+  font-weight: 500;
+}
+.btn:hover { background: var(--accent-dark); }
+.btn.secondary { background: #fff; color: var(--text); border: 1px solid var(--border); }
+.btn.secondary:hover { background: #f5f7fa; }
+
+.warn { color: var(--warn-text); background: var(--warn-bg); border: 1px solid var(--warn-border); padding: 12px 16px; border-radius: 8px; margin-bottom: 16px; font-size: 13.5px; }
+.ok { background: var(--ok-bg); border: 1px solid var(--ok-border); padding: 10px 16px; border-radius: 8px; margin-bottom: 16px; font-size: 13.5px; }
+.note { color: var(--text-muted); font-size: 12.5px; }
 .messages { list-style: none; padding: 0; }
-.messages li { padding: 8px 12px; background: #e6fffa; border: 1px solid #38b2ac; border-radius: 4px; margin-bottom: 8px; }
+.messages li { padding: 10px 14px; background: var(--ok-bg); border: 1px solid var(--ok-border); border-radius: 8px; margin-bottom: 10px; font-size: 13.5px; }
+
+.filter-bar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 16px; }
+.filter-bar select, .filter-bar input {
+  padding: 7px 10px; border: 1px solid var(--border); border-radius: 6px; font-size: 13.5px; background: #fff;
+}
+.filter-bar label { font-size: 13px; color: var(--text-muted); margin-right: -4px; }
+
+.stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; margin-bottom: 6px; }
+.stat-tile { background: var(--card-bg); border: 1px solid var(--border); border-radius: 10px; padding: 16px 18px; }
+.stat-tile .label { font-size: 12.5px; color: var(--text-muted); margin-bottom: 6px; }
+.stat-tile .value { font-size: 22px; font-weight: 700; }
+
 form p { margin: 10px 0; }
 label { display: inline-block; min-width: 160px; }
-input, select { padding: 4px 6px; }
+input, select { padding: 5px 8px; }
 </style>
 </head>
 <body>
-<header>
-  <div>
-    <a href="{% url 'dashboard' %}">Trang chu</a>
-    <a href="{% url 'employee_list' %}">Nhan vien</a>
-    <a href="{% url 'allowance_list' %}">Khoan ho tro</a>
-    {% if request.user.is_superuser or request.user.profile.role == 'ADMIN' %}
-      <a href="/admin/">Quan tri</a>
-      <a href="{% url 'unmatched_report' %}">Chua anh xa</a>
-    {% endif %}
+<nav class="sidebar">
+  <div class="sidebar-brand">
+    Tính lương Công đoạn
+    <small>Trung tâm Vận hành - BĐTP Huế</small>
   </div>
-  <div>
+
+  <div class="sidebar-section">Công đoạn Phát</div>
+  <ul class="sidebar-nav">
+    <li><a href="{% url 'dashboard' %}" class="{% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}"><span class="icon">&#9678;</span> Tổng quan</a></li>
+    <li><a href="{% url 'employee_list' %}" class="{% if request.resolver_match.url_name == 'employee_list' or request.resolver_match.url_name == 'employee_edit' or request.resolver_match.url_name == 'employee_create' %}active{% endif %}"><span class="icon">&#128100;</span> Nhân viên</a></li>
+    <li><a href="{% url 'allowance_list' %}" class="{% if request.resolver_match.url_name == 'allowance_list' or request.resolver_match.url_name == 'allowance_edit' or request.resolver_match.url_name == 'allowance_create' %}active{% endif %}"><span class="icon">&#128176;</span> Khoản hỗ trợ</a></li>
+    <li><a href="{% url 'payroll_detail' current_year current_month %}" class="{% if request.resolver_match.url_name == 'payroll_detail' %}active{% endif %}"><span class="icon">&#128202;</span> Lương</a></li>
+    {% if request.user.is_superuser or request.user.profile.role == 'ADMIN' %}
+    <li><a href="{% url 'unmatched_report' %}" class="{% if request.resolver_match.url_name == 'unmatched_report' %}active{% endif %}"><span class="icon">&#9888;</span> Chưa ánh xạ</a></li>
+    {% endif %}
+  </ul>
+
+  <div class="sidebar-section">Công đoạn khác</div>
+  <ul class="sidebar-nav">
+    <li><span class="disabled"><span class="icon">&#128230;</span> Thu Gom (sắp có)</span></li>
+    <li><span class="disabled"><span class="icon">&#128666;</span> Vận chuyển (sắp có)</span></li>
+    <li><span class="disabled"><span class="icon">&#127981;</span> Khai thác (sắp có)</span></li>
+  </ul>
+
+  {% if request.user.is_superuser or request.user.profile.role == 'ADMIN' %}
+  <div class="sidebar-section">Quản trị</div>
+  <ul class="sidebar-nav">
+    <li><a href="/admin/"><span class="icon">&#9881;</span> Trang quản trị</a></li>
+  </ul>
+  {% endif %}
+
+  <div class="sidebar-footer">
     {% if request.user.is_authenticated %}
-      {{ request.user.username }} &nbsp;
-      <form action="{% url 'logout' %}" method="post" style="display:inline">
+      <div class="user">{{ request.user.username }}</div>
+      <div class="role">
+        {% if request.user.is_superuser %}Admin
+        {% elif request.user.profile.role == 'ADMIN' %}Admin
+        {% elif request.user.profile.role == 'PHONG_BAN' %}Phòng ban
+        {% elif request.user.profile.role == 'TRUONG_BUU_CUC' %}Trưởng {{ request.user.profile.post_office }}
+        {% endif %}
+      </div>
+      <form action="{% url 'logout' %}" method="post">
         {% csrf_token %}
-        <button class="btn" type="submit">Dang xuat</button>
+        <button type="submit">Đăng xuất</button>
       </form>
     {% endif %}
   </div>
-</header>
-<main>
-  {% if messages %}
-    <ul class="messages">
-      {% for message in messages %}<li>{{ message }}</li>{% endfor %}
-    </ul>
-  {% endif %}
-  {% block content %}{% endblock %}
-</main>
+</nav>
+
+<div class="main">
+  <div class="topbar">
+    <h1>{% block page_title %}{% endblock %}</h1>
+  </div>
+  <div class="content">
+    {% if messages %}
+      <ul class="messages">
+        {% for message in messages %}<li>{{ message }}</li>{% endfor %}
+      </ul>
+    {% endif %}
+    {% block content %}{% endblock %}
+  </div>
+</div>
 </body>
 </html>

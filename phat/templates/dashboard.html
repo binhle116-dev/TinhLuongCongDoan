@@ -1,31 +1,43 @@
 {% extends "base.html" %}
-{% block title %}Trang chu{% endblock %}
+{% block title %}Trang chủ{% endblock %}
+{% block page_title %}Tổng quan — Tháng {{ month }}/{{ year }}{% endblock %}
 {% block content %}
-<h1>Tong quan thang {{ month }}/{{ year }}</h1>
 
 {% if not run %}
-<div class="warn">Chua co du lieu tinh luong cho thang nay. Hay import du lieu san luong hang ngay truoc.</div>
+<div class="warn">Chưa có dữ liệu tính lương cho tháng này. Hãy import dữ liệu sản lượng hàng ngày trước.</div>
 {% else %}
-<div class="warn">TAM TINH - CHUA XAC MINH. So lieu cap nhat den lan import gan nhat, chua phai luong chinh thuc.</div>
+<div class="warn">TẠM TÍNH — CHƯA XÁC MINH. Số liệu cập nhật đến lần import gần nhất, chưa phải lương chính thức.</div>
 {% endif %}
 
-<div class="card">
-  <table>
-    <tr><td class="text">So lao dong co du lieu</td><td>{{ employee_count }}</td></tr>
-    <tr><td class="text">Cong theo san luong (tam tinh)</td><td>{{ totals.piece_rate|default:0|floatformat:0 }}</td></tr>
-    <tr><td class="text">Tong ho tro</td><td>{{ totals.allowance|default:0|floatformat:0 }}</td></tr>
-    <tr class="total"><td class="text">Tong thu nhap</td><td>{{ totals.total|default:0|floatformat:0 }}</td></tr>
-  </table>
+<div class="stat-grid">
+  <div class="stat-tile">
+    <div class="label">Số lao động có dữ liệu</div>
+    <div class="value">{{ employee_count }}</div>
+  </div>
+  <div class="stat-tile">
+    <div class="label">Công theo sản lượng (tạm tính)</div>
+    <div class="value">{{ totals.piece_rate|default:0|floatformat:0 }}</div>
+  </div>
+  <div class="stat-tile">
+    <div class="label">Tổng hỗ trợ</div>
+    <div class="value">{{ totals.allowance|default:0|floatformat:0 }}</div>
+  </div>
+  <div class="stat-tile">
+    <div class="label">Tổng thu nhập</div>
+    <div class="value">{{ totals.total|default:0|floatformat:0 }}</div>
+  </div>
 </div>
 
-<p><a class="btn" href="{% url 'payroll_detail' year month %}">Xem chi tiet thang nay</a></p>
+<p><a class="btn" href="{% url 'payroll_detail' year month %}">Xem chi tiết tháng này</a></p>
 
 {% if last_batch %}
-<h2>Lan import gan nhat</h2>
-<p class="note">
-  File: {{ last_batch.source_filename }} - Ngay du lieu: {{ last_batch.production_date }} -
-  {{ last_batch.row_count }} dong, {{ last_batch.unmatched_count }} dong chua anh xa duoc
-  ({{ last_batch.created_at }})
-</p>
+<div class="card">
+  <h2 style="margin-top:0">Lần import gần nhất</h2>
+  <p class="note">
+    File: <b>{{ last_batch.source_filename }}</b> — Ngày dữ liệu: {{ last_batch.production_date }} —
+    {{ last_batch.row_count }} dòng, {{ last_batch.unmatched_count }} dòng chưa ánh xạ được
+    ({{ last_batch.created_at }})
+  </p>
+</div>
 {% endif %}
 {% endblock %}

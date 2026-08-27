@@ -1,15 +1,16 @@
 {% extends "base.html" %}
-{% block title %}Khoan ho tro{% endblock %}
+{% block title %}Khoản hỗ trợ{% endblock %}
+{% block page_title %}Khoản hỗ trợ / cố định — Tháng {{ month }}/{{ year }}{% endblock %}
 {% block content %}
-<h1>Khoan ho tro/co dinh - Thang {{ month }}/{{ year }}</h1>
-<form method="get" style="margin-bottom:12px">
-  <label>Nam</label><input type="number" name="year" value="{{ year }}">
-  <label>Thang</label><input type="number" name="month" value="{{ month }}">
-  <button class="btn" type="submit">Xem</button>
+<form method="get" class="filter-bar">
+  <label>Năm</label><input type="number" name="year" value="{{ year }}" style="width:90px">
+  <label>Tháng</label><input type="number" name="month" value="{{ month }}" style="width:70px">
+  <button class="btn secondary" type="submit">Xem</button>
 </form>
-<p><a class="btn" href="{% url 'allowance_create' %}">+ Them khoan ho tro</a></p>
+<p><a class="btn" href="{% url 'allowance_create' %}">+ Thêm khoản hỗ trợ</a></p>
+<div class="table-wrap">
 <table>
-<thead><tr><th class="text">Nhan vien</th><th class="text">Loai khoan</th><th>So luong</th><th>Don gia</th><th>Thanh tien</th><th></th></tr></thead>
+<thead><tr><th class="text">Nhân viên</th><th class="text">Loại khoản</th><th>Số lượng</th><th>Đơn giá</th><th>Thành tiền</th><th></th></tr></thead>
 <tbody>
 {% for e in entries %}
 <tr>
@@ -18,11 +19,12 @@
   <td>{{ e.quantity }}</td>
   <td>{{ e.unit_price|default:"-" }}</td>
   <td>{{ e.amount|floatformat:0 }}</td>
-  <td><a href="{% url 'allowance_edit' e.pk %}">Sua</a></td>
+  <td><a href="{% url 'allowance_edit' e.pk %}">Sửa</a></td>
 </tr>
 {% empty %}
-<tr><td colspan="6" class="text"><i>Chua co khoan ho tro nao thang nay.</i></td></tr>
+<tr><td colspan="6" class="text"><i>Chưa có khoản hỗ trợ nào tháng này.</i></td></tr>
 {% endfor %}
 </tbody>
 </table>
+</div>
 {% endblock %}
