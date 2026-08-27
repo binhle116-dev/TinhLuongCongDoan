@@ -6,7 +6,7 @@ and would be meaningless here. This document illustrates the same
 underlying principle (**backend built and proven correct before any
 dedicated UI is built on top of it**) using this project's own real
 example. See `docs/01_GOVERNANCE/PROJECT_DECISIONS.md` `DEC-008`
-(proposed, pending Product Owner confirmation of this rename).
+(confirmed by the Product Owner).
 
 Status: **Phase A retrospective (COMPLETED, Milestone 1) + Phase B
 proposal (NOT STARTED, awaiting PO approval)** — 2026-08-27.

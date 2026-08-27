@@ -15,7 +15,7 @@ supersede it with a new entry that references the old one if it changes.
 | DEC-005 | 2026-08-27 | `ServiceMapping`, `RouteGroupMapping`, and `PriceCard` are intentionally left empty at Milestone 1 delivery rather than populated with inferred/guessed values, because the service-code-to-category mapping and the route-to-price-group mapping are not fully confirmed (see `PROJECT_CONTEXT.md` Section 6). Every "công theo sản lượng" figure reads as 0 until these are populated via Django admin. This is by design, not a defect. | Approved |
 | DEC-006 | 2026-08-27 | The governance document rename `CODEX_DOCUMENTATION_STANDARD.md` → `DEVELOPE_DOCUMENTATION_STANDARD.md` (proposed by Claude Code for naming consistency) is confirmed by the Product Owner. | Approved |
 | DEC-007 | 2026-08-27 | Connecting this repository to `https://github.com/binhle116-dev/TinhLuongCongDoan.git` (git init, remote add, first push) is authorized by the Product Owner. | Approved |
-| DEC-008 | 2026-08-27 | The prior project's `AUTO-BACKFILL-UI_PLAN.md` example is recreated as `docs/10_TICKETS/PRICING_MAPPING_BACKEND_FIRST_PLAN.md`, renamed because "AUTO-BACKFILL-UI" is meaningless outside the source project — content illustrates the same backend-first/UI-second principle using Module Phát's real pricing/mapping work instead. | Proposed — needs Product Owner confirmation |
+| DEC-008 | 2026-08-27 | The prior project's `AUTO-BACKFILL-UI_PLAN.md` example is recreated as `docs/10_TICKETS/PRICING_MAPPING_BACKEND_FIRST_PLAN.md`, renamed because "AUTO-BACKFILL-UI" is meaningless outside the source project — content illustrates the same backend-first/UI-second principle using Module Phát's real pricing/mapping work instead. | Approved |
 
 ## How to add a decision
 
