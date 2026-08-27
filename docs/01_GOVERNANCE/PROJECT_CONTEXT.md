@@ -166,11 +166,40 @@ forward unless TCHC/TCKH direct otherwise.
    settled price table for the year rather than something recalculated
    fresh every month — this is plausible but unconfirmed).
 
-**Do not populate these tables with inferred/guessed values.** When this
-information becomes available (from TCHC/TCKH or whoever maintains the
-master workbook), enter it via Django admin (`ServiceMapping`,
-`RouteGroupMapping`, `PriceCard`) — no code change is needed once the
-data exists.
+**Update 2026-08-27 (`DEC-009`)**: the Product Owner directed populating
+these tables from available real data rather than continuing to wait —
+`phat/management/commands/seed_pricing_data.py` now does this,
+idempotently, from the July master workbook's "Đơn giá XD 2026" sheet
+(price table) and "Tuyến" sheet (route→group, **verified 117/117 exact
+string match** against real `ROUTE_PO_CODE` values — no code
+transformation needed, contrary to earlier concern about differing
+digit lengths). `ServiceMapping` rules were derived from the actual
+`SERVICE_NAME_PAYROLL`/`TYPE_CODE_PAYROLL`/`AREA_CODE`/weight
+combinations observed in real imported data (not guessed): items 1-2
+above are resolved this way for **98.6%** of real rows (6611/6706 in
+the 2026-08-26 sample). The 9 previously-flagged ambiguous combinations
+(`C-Báo Phát`, `Gói nhỏ thường`, the `KT1 ...- B`/`...- C`/`KT1 B`/`KT1
+C` lettered variants, `KT1 Hỏa tốc Hẹn giờ`) remain deliberately
+unmapped — they still show up in `/bao-cao/chua-anh-xa/` rather than
+being guessed. Item 3 (the monthly calibration ratio / whether "Đơn giá
+XD 2026" is a fixed year-long table) is **still unconfirmed** — this
+population trusts that table as-is, which is a reasonable read given its
+"XD 2026" (built for 2026) naming, but has not been independently
+re-verified against a known full-month total (no complete month of daily
+`SanLuongChiTiet` files exists yet, and no `Employee.postman_code` data
+is loaded yet to compute a real payroll total end-to-end). Treat computed
+totals as provisional until that validation happens.
+
+A one-time gotcha worth knowing if this seed script is ever rewritten:
+the "Đơn giá XD 2026" sheet contains the same price table duplicated
+twice plus a third, differently-shaped "Đơn giá 2025"/"90%" reference
+table further down in the same sheet — naive row-scanning must filter
+for rows whose first cell starts with "NHÓM", not just "first cell is
+non-empty". Also, `django.utils.text.slugify()` strips `<=`/`>` symbols
+entirely, so naively slugifying category names like "EMS nội tỉnh
+<=2kg" and "EMS nội tỉnh >2kg" collide into the same code — the seed
+script works around this by including the source column index in the
+generated `ServiceCategory.code`.
 
 ## 7. Technical Architecture
 

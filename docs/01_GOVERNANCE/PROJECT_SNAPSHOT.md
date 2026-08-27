@@ -19,7 +19,7 @@ session, second only to `README_AI.md`.
 | --- | --- |
 | Current Phase | `Module Phát — Milestone 1 (MVP) COMPLETED. No further phase activated yet.` |
 | Current Ticket | `None — AWAITING PO DIRECTION` |
-| Next Ticket | `Not yet chosen by the Product Owner. Candidates: (a) populate ServiceMapping/RouteGroupMapping/PriceCard once TCHC/TCKH confirms the mapping; (b) formal PO UI Acceptance pass on Milestone 1 under this governance model; (c) start module Thu Gom. See Section 4.` |
+| Next Ticket | `Not yet chosen by the Product Owner. Candidates: (a) populate real Employee.postman_code data so payroll totals can be computed end-to-end (currently 0 employees loaded); (b) validate a full month's provisional total against a known-correct figure; (c) formal PO UI Acceptance pass on Milestone 1 under this governance model; (d) start module Thu Gom. See Section 4.` |
 | Last PO Status | `Product Owner has used Milestone 1 directly (logged into /admin/, explored roles) and raised no FAIL. No formal PO PASS has been recorded under PO_UI_ACCEPTANCE_WORKFLOW.md yet, since that document did not exist until this ticket.` |
 | Current Branch | `Not yet a Git repository — see Repository Status below.` |
 | Current Manifest | `None — no ticket-specific manifest exists yet under docs/10_TICKETS/.` |
@@ -28,6 +28,7 @@ session, second only to `README_AI.md`.
 | Technical Status | `10/10 automated tests pass (python manage.py test). python manage.py check reports no issues. Manual browser walkthrough confirmed RBAC scoping (404 cross-office, 403 admin-only page), allowance entry auto-calculation, Excel export scoping, and the unmatched-mapping report.` |
 | Runtime Status | `Verified via manual browser session (Claude Browser tool) during Milestone 1, not via a standing runtime check. No production deployment yet — waitress entrypoint (serve.py) exists and was smoke-tested; no Windows Scheduled Task has actually been created yet (commands documented in README.md, not yet run).` |
 | PO UI Check Required | `Not yet decided for Milestone 1 retroactively — this governance document set is new. Recommend the Product Owner do a first PO_UI_ACCEPTANCE_WORKFLOW.md pass before treating Milestone 1 as fully "Module Completed" under this standard.` |
+| Pricing Data Status | `Populated 2026-08-27 (DEC-009): 48 ServiceCategory, 10 PriceGroup, 480 PriceCard rows, 221 RouteGroupMapping rows (verified 117/117 exact match against real route codes), 47 ServiceMapping rules resolving 98.6% of real observed data (6611/6706 rows). 9 known-ambiguous combinations remain unmapped by design. Still NOT independently validated against a known full-month total (no Employee.postman_code data loaded yet, no complete month of daily raw files). See PROJECT_CONTEXT.md Section 6.` |
 | PO Product Status | `Not formally recorded. Product Owner has not reported a FAIL.` |
 | Last Closed Ticket | `MILESTONE-1-PHAT-MVP — COMPLETED / TECHNICAL SELF-VERIFIED (2026-08-27). See PROJECT_PROGRESS.md for the one-line record.` |
 | Last Closed Manifest | `None — Milestone 1 was executed before this manifest-driven governance model existed; its design record lives in the Claude Code plan history for this project, not in docs/10_TICKETS/.` |
