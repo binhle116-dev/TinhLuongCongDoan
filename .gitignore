@@ -11,7 +11,8 @@ media/
 
 # Project-specific runtime artifacts
 backups/
-scripts/pull_log.txt
+scripts/pull_log*.txt
+scripts/default
 
 # Env / secrets
 .env

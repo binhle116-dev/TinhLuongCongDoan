@@ -90,7 +90,7 @@ Several real files/feeds exist; not all are currently wired into the app:
   `STATUS_DATE`...). Pulled from an internal SFTP server
   (`10.1.45.10:22`, SFTPGo, folder `/SLP Chitiet`) via a WinSCP script
   (`scripts/pull_and_import_daily.bat` + `pull_sanluong_chitiet.txt`,
-  saved site name `CAS_Hue_SFTP`). This is what `phat.services.importer`
+  saved site name `cas_hue@10.1.45.10`). This is what `phat.services.importer`
   loads into `RawDailyProduction`.
 - **`CÔNG PHÁT THÁNG MM.yyyy - ttvh.xlsx`** — the monthly master
   workbook someone in the operations center builds by hand/formula each

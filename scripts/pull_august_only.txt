@@ -4,6 +4,6 @@ option transfer binary
 open cas_hue@10.1.45.10
 cd "/SLP Chitiet"
 lcd "D:\ONEDRIVE\Trung tam Van hanh - BDTP Hue 05.2025\2026\San luong tinh luong cac cong doan\San luong phat"
-get -neweronly "SanLuongChiTiet_*.xlsx"
+get -neweronly "SanLuongChiTiet_*082026*.xlsx"
 close
 exit

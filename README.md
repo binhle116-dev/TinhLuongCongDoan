@@ -61,7 +61,7 @@ schtasks /create /tn "TinhLuongCongDoan_Web" /tr "\"C:\Path\To\python.exe\" \"D:
 
 `scripts/pull_and_import_daily.bat` gop 2 buoc: tai file
 `SanLuongChiTiet_DDMMYYYY.xlsx` moi nhat qua WinSCP (site da luu ten
-`CAS_Hue_SFTP` - xem huong dan tao Saved Site truoc do) roi tu dong chay
+`cas_hue@10.1.45.10` - xem huong dan tao Saved Site truoc do) roi tu dong chay
 `import_daily_production`. Dat lich chay moi ngay sau 10h:
 
 ```bash
