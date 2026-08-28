@@ -96,7 +96,7 @@ def employee_list(request):
         first_office = office_choices.first()
         selected_office = first_office.code if first_office else ""
 
-    employees = scope_queryset(Employee.objects.select_related("post_office"), request.user)
+    employees = scope_queryset(Employee.objects.select_related("post_office", "position"), request.user)
     if selected_office:
         employees = employees.filter(post_office__code=selected_office)
     employees = employees.order_by("full_name")

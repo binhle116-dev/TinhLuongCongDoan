@@ -1,9 +1,33 @@
 {% extends "base.html" %}
 {% block title %}Khai thác — Chưa ánh xạ{% endblock %}
-{% block page_title %}Khai thác — Loại chưa ánh xạ vào Nhóm dịch vụ{% endblock %}
+{% block page_title %}Công đoạn khai thác{% endblock %}
+
+{% block extra_head %}
+<style>
+.un-breadcrumb { font-size: 12.5px; color: var(--text-muted); margin-bottom: 6px; }
+.un-breadcrumb a { color: var(--text-muted); text-decoration: none; }
+.un-breadcrumb a:hover { color: var(--accent); text-decoration: underline; }
+.un-header h1 { font-size: 22px; margin: 0 0 4px; font-weight: 700; }
+.un-header .subtitle { color: var(--text-muted); font-size: 13.5px; margin: 0 0 18px; }
+.un-alert { display: flex; gap: 14px; padding: 14px 16px; border-radius: 10px; margin-bottom: 22px; border: 1px solid #f3d999; background: #fffaf0; }
+.un-alert-icon { width: 32px; height: 32px; border-radius: 8px; background: #fdedc7; color: #8a5a00; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.un-alert-icon svg { width: 17px; height: 17px; }
+.un-alert p { margin: 0; font-size: 13px; color: var(--text-muted); }
+</style>
+{% endblock %}
+
 {% block content %}
-<p class="note">Sửa qua Trang quản trị → Anh xa Loai -> Nhom dich vu Khai thac. Loại chưa ánh xạ sẽ
-KHÔNG được tính vào Quỹ tiền lương cho tới khi được xác nhận (tránh đoán bừa Nhóm dịch vụ).</p>
+
+<div class="un-breadcrumb"><a href="{% url 'dashboard' %}">Tổng quan</a> <span>/</span> Công đoạn khai thác <span>/</span> Chưa ánh xạ</div>
+<div class="un-header">
+  <h1>Loại chưa ánh xạ vào Nhóm dịch vụ</h1>
+  <p class="subtitle">Sản lượng thuộc các Loại này chưa được tính vào Quỹ tiền lương</p>
+</div>
+
+<div class="un-alert">
+  <div class="un-alert-icon">{% include "icons/alert-triangle.svg" %}</div>
+  <p>Sửa qua Trang quản trị → Anh xạ Loại → Nhóm dịch vụ Khai thác. Loại chưa ánh xạ sẽ KHÔNG được tính vào Quỹ tiền lương cho tới khi được xác nhận (tránh đoán bừa Nhóm dịch vụ).</p>
+</div>
 
 <h2>Chưa ánh xạ ({{ unmapped|length }})</h2>
 <div class="table-wrap">
@@ -19,7 +43,7 @@ KHÔNG được tính vào Quỹ tiền lương cho tới khi được xác nh�
 </table>
 </div>
 
-<h2>Đã ánh xạ ({{ mapped|length }})</h2>
+<h2 style="margin-top:28px">Đã ánh xạ ({{ mapped|length }})</h2>
 <div class="table-wrap">
 <table>
 <thead><tr><th class="text">Loại (raw)</th><th class="text">Nhóm dịch vụ</th></tr></thead>

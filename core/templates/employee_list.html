@@ -1,37 +1,91 @@
 {% extends "base.html" %}
+{% load core_extras %}
 {% block title %}Nhân viên{% endblock %}
-{% block page_title %}Nhân viên{% if selected_office %} — {{ selected_office }}{% endif %}{% endblock %}
+{% block page_title %}Nhân sự{% endblock %}
+
+{% block extra_head %}
+<style>
+.em-breadcrumb { font-size: 12.5px; color: var(--text-muted); margin-bottom: 6px; }
+.em-breadcrumb a { color: var(--text-muted); text-decoration: none; }
+.em-breadcrumb a:hover { color: var(--accent); text-decoration: underline; }
+.em-header { margin-bottom: 18px; }
+.em-header h1 { font-size: 22px; margin: 0 0 4px; font-weight: 700; }
+.em-header .subtitle { color: var(--text-muted); font-size: 13.5px; margin: 0; }
+.em-toolbar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 14px; }
+.em-search { position: relative; }
+.em-search svg { position: absolute; left: 9px; top: 50%; transform: translateY(-50%); width: 15px; height: 15px; color: var(--text-muted); }
+.em-search input { padding: 6px 10px 6px 30px; border: 1px solid var(--border); border-radius: 7px; font-size: 13px; width: 220px; }
+.em-toolbar select { padding: 6px 8px; border: 1px solid var(--border); border-radius: 7px; font-size: 12.5px; }
+.em-toolbar-spacer { flex: 1; }
+.em-badge { display: inline-block; padding: 2px 9px; border-radius: 999px; font-size: 11.5px; font-weight: 600; }
+.em-badge.active { background: var(--ok-bg); color: #1a8a4c; }
+.em-badge.inactive { background: #fdeeee; color: #c23636; }
+</style>
+{% endblock %}
+
 {% block content %}
 
-{% if office_choices|length > 1 %}
-<form method="get" class="filter-bar">
-  <label>Bưu cục</label>
-  <select name="bc" onchange="this.form.submit()">
-    {% for o in office_choices %}
-      <option value="{{ o.code }}" {% if o.code == selected_office %}selected{% endif %}>{{ o.code }} - {{ o.name }}</option>
-    {% endfor %}
-  </select>
-</form>
-{% endif %}
+<div class="em-breadcrumb"><a href="{% url 'dashboard' %}">Tổng quan</a> <span>/</span> Nhân sự</div>
+<div class="em-header">
+  <h1>Nhân sự</h1>
+  <p class="subtitle">Danh sách nhân viên theo bưu cục</p>
+</div>
 
-<p><a class="btn" href="{% url 'employee_create' %}">+ Thêm nhân viên</a> <span class="note">{{ employees|length }} nhân viên</span></p>
+<div class="em-toolbar">
+  {% if office_choices|length > 1 %}
+  <form method="get" style="margin:0">
+    <select name="bc" onchange="this.form.submit()">
+      {% for o in office_choices %}
+        <option value="{{ o.code }}" {% if o.code == selected_office %}selected{% endif %}>{{ o.code }} - {{ o.name }}</option>
+      {% endfor %}
+    </select>
+  </form>
+  {% endif %}
+  <div class="em-search">
+    {% include "icons/search.svg" %}
+    <input type="text" placeholder="Tìm theo tên, mã HRM hoặc mã bưu tá" data-emp-search aria-label="Tìm nhân viên">
+  </div>
+  <div class="em-toolbar-spacer"></div>
+  <span class="note" id="em-visible-count">{{ employees|length }} nhân viên</span>
+  <a class="btn" href="{% url 'employee_create' %}">{% include "icons/users.svg" %} Thêm nhân viên</a>
+</div>
+
 <div class="table-wrap">
-<table>
-<thead><tr><th class="text">Mã HRM</th><th class="text">Mã bưu tá</th><th class="text">Họ tên</th><th class="text">Loại HĐ</th><th class="text">Trạng thái</th><th></th></tr></thead>
+<table id="em-table">
+<thead><tr><th class="text">Mã HRM</th><th class="text">Mã bưu tá</th><th class="text">Họ tên</th><th class="text">Chức danh</th><th class="text">Loại HĐ</th><th class="text">Trạng thái</th><th></th></tr></thead>
 <tbody>
 {% for e in employees %}
-<tr>
+<tr data-search="{{ e.full_name|lower }} {{ e.hrm_code }} {{ e.postman_code }}">
   <td class="text">{{ e.hrm_code }}</td>
-  <td class="text">{{ e.postman_code }}</td>
+  <td class="text">{{ e.postman_code|default:"—" }}</td>
   <td class="text">{{ e.full_name }}</td>
-  <td class="text">{{ e.get_contract_type_display }}</td>
-  <td class="text">{% if e.is_active %}Đang làm việc{% else %}<span style="color:#b23">Ngừng hoạt động</span>{% endif %}</td>
+  <td class="text">{{ e.position|default:"—" }}</td>
+  <td class="text">{{ e.get_contract_type_display|default:"—" }}</td>
+  <td class="text">{% if e.is_active %}<span class="em-badge active">Đang làm việc</span>{% else %}<span class="em-badge inactive">Ngừng hoạt động</span>{% endif %}</td>
   <td><a href="{% url 'employee_edit' e.pk %}">Sửa</a></td>
 </tr>
 {% empty %}
-<tr><td colspan="6" class="text"><i>Chưa có nhân viên nào thuộc bưu cục này.</i></td></tr>
+<tr><td colspan="7" class="text"><i>Chưa có nhân viên nào thuộc bưu cục này.</i></td></tr>
 {% endfor %}
 </tbody>
 </table>
 </div>
+
+<script>
+(function () {
+  var input = document.querySelector('[data-emp-search]');
+  var rows = Array.prototype.slice.call(document.querySelectorAll('#em-table tbody tr[data-search]'));
+  if (!input || !rows.length) return;
+  input.addEventListener('input', function () {
+    var q = input.value.trim().toLowerCase();
+    var visible = 0;
+    rows.forEach(function (r) {
+      var match = !q || (r.getAttribute('data-search') || '').indexOf(q) !== -1;
+      r.style.display = match ? '' : 'none';
+      if (match) visible++;
+    });
+    document.getElementById('em-visible-count').textContent = visible + ' / ' + rows.length + ' nhân viên';
+  });
+})();
+</script>
 {% endblock %}

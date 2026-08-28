@@ -87,8 +87,10 @@ def allowance_list(request):
         "employee", "allowance_type"
     )
     entries = scope_queryset(entries, request.user, field_name="employee__post_office")
+    total_amount = entries.aggregate(s=Sum("amount"))["s"] or Decimal("0")
     return render(
-        request, "allowance_list.html", {"entries": entries, "year": year, "month": month}
+        request, "allowance_list.html",
+        {"entries": entries, "year": year, "month": month, "total_amount": total_amount},
     )
 
 

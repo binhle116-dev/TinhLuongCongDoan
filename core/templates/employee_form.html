@@ -1,7 +1,13 @@
 {% extends "base.html" %}
 {% block title %}Nhân viên{% endblock %}
-{% block page_title %}{% if instance %}Sửa nhân viên{% else %}Thêm nhân viên{% endif %}{% endblock %}
+{% block page_title %}Nhân sự{% endblock %}
 {% block content %}
+<div class="em-breadcrumb" style="font-size:12.5px;color:var(--text-muted);margin-bottom:6px">
+  <a href="{% url 'dashboard' %}" style="color:var(--text-muted);text-decoration:none">Tổng quan</a> <span>/</span>
+  <a href="{% url 'employee_list' %}" style="color:var(--text-muted);text-decoration:none">Nhân sự</a> <span>/</span>
+  {% if instance %}Sửa nhân viên{% else %}Thêm nhân viên{% endif %}
+</div>
+<h1 style="font-size:20px;margin:0 0 16px;font-weight:700">{% if instance %}Sửa nhân viên — {{ instance.full_name }}{% else %}Thêm nhân viên{% endif %}</h1>
 <div class="card" style="max-width:560px">
 <form method="post">
   {% csrf_token %}
