@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load khaithac_extras %}
+{% load core_extras %}
 {% block title %}Quỹ tiền lương Khai thác{% endblock %}
 {% block page_title %}Khai thác{% endblock %}
 
@@ -72,7 +72,8 @@
 .kt-donut-center strong { display: block; font-size: 15px; color: var(--text); }
 .kt-legend { display: flex; flex-direction: column; gap: 7px; font-size: 12.5px; }
 .kt-legend-dot { width: 9px; height: 9px; border-radius: 50%; display: inline-block; margin-right: 6px; flex-shrink: 0; }
-.kt-service-table-wrap { flex: 1; min-width: 320px; }
+.kt-service-layout { min-width: 0; }
+.kt-service-table-wrap { flex: 1; min-width: 0; }
 .kt-bar-track { background: #eef1f5; border-radius: 999px; height: 6px; width: 72px; overflow: hidden; display: inline-block; vertical-align: middle; margin-right: 8px; }
 .kt-bar-fill { height: 100%; border-radius: 999px; }
 

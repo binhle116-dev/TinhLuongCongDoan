@@ -1,7 +1,8 @@
 """Dinh dang so theo chuan Viet Nam (dau cham phan nhom nghin, dau phay
-thap phan) - chi dung trong template module khaithac, khong dong vao
-cach hien thi so cua cac module khac (Phat dang dung |floatformat truc
-tiep, giu nguyen khong doi de tranh anh huong ngoai pham vi yeu cau)."""
+thap phan) + vai tien ich template nho, dung chung cho cac trang can
+trinh bay lai du lieu dep hon (Khai thac, Phat...). Chuyen tu
+khaithac/templatetags sang day (DEC-025) de dung duoc o ca 2 module thay
+vi trung lap code."""
 from __future__ import annotations
 
 from decimal import ROUND_HALF_UP, Decimal, InvalidOperation

@@ -1,62 +1,437 @@
 {% extends "base.html" %}
-{% block title %}Lương{% endblock %}
-{% block page_title %}Lương công đoạn Phát — Tháng {{ month }}/{{ year }}{% endblock %}
+{% load core_extras %}
+{% block title %}Lương Phát{% endblock %}
+{% block page_title %}Công đoạn Phát{% endblock %}
+
+{% block extra_head %}
+<style>
+.ph-breadcrumb { font-size: 12.5px; color: var(--text-muted); margin-bottom: 6px; }
+.ph-breadcrumb a { color: var(--text-muted); text-decoration: none; }
+.ph-breadcrumb a:hover { color: var(--accent); text-decoration: underline; }
+.ph-header { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-start; gap: 16px; margin-bottom: 20px; }
+.ph-header h1 { font-size: 22px; margin: 0 0 4px; font-weight: 700; }
+.ph-header .subtitle { color: var(--text-muted); font-size: 13.5px; margin: 0; }
+.ph-meta { display: flex; flex-wrap: wrap; gap: 14px; align-items: center; margin-top: 10px; font-size: 12.5px; color: var(--text-muted); }
+.ph-meta .sep { color: var(--border); }
+.ph-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.ph-period-form { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-top: 12px; }
+.ph-period-form select { padding: 7px 10px; border: 1px solid var(--border); border-radius: 6px; font-size: 13.5px; background: #fff; }
+
+.ph-kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 22px; }
+.ph-kpi { background: var(--card-bg); border: 1px solid var(--border); border-radius: 10px; padding: 16px 18px; display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.ph-kpi.emphasis { border-color: #c9def8; background: linear-gradient(180deg, #f7fbff 0%, #ffffff 60%); }
+.ph-kpi-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
+.ph-kpi-icon { width: 34px; height: 34px; border-radius: 8px; background: var(--accent-soft); color: var(--accent-dark); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.ph-kpi-icon svg { width: 18px; height: 18px; }
+.ph-kpi-label { font-size: 12.5px; color: var(--text-muted); font-weight: 500; }
+.ph-kpi-value { font-size: 24px; font-weight: 700; line-height: 1.15; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.ph-kpi-unit { font-size: 12.5px; font-weight: 500; color: var(--text-muted); margin-left: 3px; }
+.ph-kpi-sub { font-size: 12px; color: var(--text-muted); }
+.ph-trend { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; font-weight: 600; padding: 2px 7px; border-radius: 999px; }
+.ph-trend svg { width: 12px; height: 12px; }
+.ph-trend.up { background: #e8f7ee; color: #1a8a4c; }
+.ph-trend.down { background: #fdeeee; color: #c23636; }
+.ph-trend.flat { background: #f1f3f5; color: var(--text-muted); }
+
+.ph-alert { display: flex; gap: 14px; padding: 16px 18px; border-radius: 10px; margin-bottom: 22px; border: 1px solid; }
+.ph-alert.amber { background: #fffaf0; border-color: #f3d999; }
+.ph-alert .ph-alert-icon { width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; background: #fdedc7; color: #8a5a00; }
+.ph-alert-icon svg { width: 20px; height: 20px; }
+.ph-alert-body { flex: 1; min-width: 0; }
+.ph-alert-title { font-weight: 700; font-size: 14.5px; margin-bottom: 3px; }
+.ph-alert-desc { font-size: 13px; color: var(--text-muted); }
+
+.ph-section { margin-bottom: 26px; }
+.ph-section-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; margin-bottom: 12px; flex-wrap: wrap; }
+.ph-section-head h2 { margin: 0; font-size: 16px; font-weight: 700; }
+.ph-section-head .ph-section-note { font-size: 12.5px; color: var(--text-muted); }
+
+.ph-office-layout { display: flex; gap: 24px; flex-wrap: wrap; align-items: center; }
+.ph-donut-wrap { flex-shrink: 0; display: flex; align-items: center; gap: 18px; }
+.ph-office-layout { min-width: 0; }
+.ph-office-table-wrap { flex: 1; min-width: 0; }
+.ph-bar-track { background: #eef1f5; border-radius: 999px; height: 6px; width: 64px; overflow: hidden; display: inline-block; vertical-align: middle; margin-right: 8px; }
+.ph-bar-fill { height: 100%; border-radius: 999px; }
+.ph-dot { width: 9px; height: 9px; border-radius: 50%; display: inline-block; margin-right: 6px; flex-shrink: 0; }
+
+.ph-toolbar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 14px; }
+.ph-search { position: relative; }
+.ph-search svg { position: absolute; left: 9px; top: 50%; transform: translateY(-50%); width: 15px; height: 15px; color: var(--text-muted); }
+.ph-search input { padding: 6px 10px 6px 30px; border: 1px solid var(--border); border-radius: 7px; font-size: 13px; width: 210px; }
+.ph-toolbar select { padding: 6px 8px; border: 1px solid var(--border); border-radius: 7px; font-size: 12.5px; }
+.ph-toolbar-spacer { flex: 1; }
+
+.ph-emp-table-wrap { overflow: auto; border: 1px solid var(--border); border-radius: 10px; max-height: 620px; }
+table.ph-emp-table { border-collapse: separate; border-spacing: 0; width: 100%; font-size: 13px; font-variant-numeric: tabular-nums; }
+table.ph-emp-table th {
+  position: sticky; top: 0; z-index: 2; background: #f5f7fa; color: var(--text-muted);
+  font-size: 11px; text-transform: uppercase; letter-spacing: .03em; font-weight: 700;
+  padding: 9px 12px; border-bottom: 1px solid var(--border); white-space: nowrap; text-align: right; cursor: pointer; user-select: none;
+}
+table.ph-emp-table th.text, table.ph-emp-table td.text { text-align: left; }
+table.ph-emp-table th .th-inner { display: inline-flex; align-items: center; gap: 4px; }
+table.ph-emp-table th .th-inner svg { width: 11px; height: 11px; opacity: .55; }
+table.ph-emp-table td { padding: 8px 12px; border-bottom: 1px solid #eef1f5; text-align: right; vertical-align: middle; }
+table.ph-emp-table tbody tr:nth-child(even) td { background: rgba(15, 35, 60, .015); }
+table.ph-emp-table tbody tr:hover td { background: #eef4fc !important; }
+table.ph-emp-table tfoot td { position: sticky; bottom: 0; background: #f0f4f8; font-weight: 700; border-top: 2px solid var(--border); border-bottom: none; }
+
+.ph-empcards { display: none; flex-direction: column; gap: 10px; }
+.ph-empcard { border: 1px solid var(--border); border-radius: 10px; background: #fff; padding: 12px 14px; display: flex; justify-content: space-between; gap: 10px; }
+.ph-empcard .name { font-weight: 600; }
+.ph-empcard .office { font-size: 11.5px; color: var(--text-muted); }
+.ph-empcard-total { text-align: right; font-weight: 700; font-variant-numeric: tabular-nums; }
+.ph-empcard-sub { font-size: 11.5px; color: var(--text-muted); font-weight: 400; }
+
+.ph-pager { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 12px; flex-wrap: wrap; font-size: 12.5px; color: var(--text-muted); }
+.ph-pager-btns { display: flex; gap: 6px; align-items: center; }
+.ph-pager-btns button { border: 1px solid var(--border); background: #fff; border-radius: 6px; padding: 5px 9px; cursor: pointer; }
+.ph-pager-btns button:disabled { opacity: .4; cursor: not-allowed; }
+
+@media (max-width: 1200px) { .ph-kpi-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 600px) { .ph-kpi-grid { grid-template-columns: 1fr; } }
+@media (max-width: 768px) {
+  .ph-emp-table-wrap { display: none; }
+  .ph-empcards { display: flex; }
+  .ph-pager { display: none; }
+}
+</style>
+{% endblock %}
+
 {% block content %}
 
+<div class="ph-breadcrumb">
+  <a href="{% url 'dashboard' %}">Tổng quan</a> <span>/</span> Công đoạn Phát <span>/</span> Lương
+</div>
+
+<div class="ph-header">
+  <div>
+    <h1>Lương công đoạn Phát</h1>
+    <p class="subtitle">Theo dõi thu nhập theo bưu cục và người lao động</p>
+    <div class="ph-meta">
+      <span>Kỳ báo cáo: Tháng {{ month }}/{{ year }}</span>
+      {% if last_updated %}
+      <span class="sep">•</span>
+      <span>Cập nhật lần cuối: {{ last_updated|date:"d/m/Y H:i" }}</span>
+      {% endif %}
+    </div>
+    {% if period_options %}
+    <div class="ph-period-form">
+      <label class="note" for="ph-period-select">Kỳ báo cáo</label>
+      <select id="ph-period-select" onchange="phGoToPeriod(this)" aria-label="Chọn kỳ báo cáo">
+        {% for opt_y, opt_m, opt_label in period_options %}
+        <option value="{{ opt_y }}-{{ opt_m }}" {% if opt_y == year and opt_m == month %}selected{% endif %}>{{ opt_label }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    {% endif %}
+  </div>
+  <div class="ph-actions">
+    <a class="btn secondary" href="{% url 'export_excel' year month %}{% if selected_office %}?bc={{ selected_office }}{% endif %}">{% include "icons/download.svg" %} Xuất Excel</a>
+    {% if is_admin %}
+    <a class="btn secondary" href="{% url 'unmatched_report' %}">{% include "icons/alert-triangle.svg" %} Chưa ánh xạ</a>
+    {% endif %}
+  </div>
+</div>
+
 {% if is_provisional %}
-<div class="warn"><b>TẠM TÍNH — CHƯA XÁC MINH.</b> Số liệu tính từ dữ liệu sản lượng hàng ngày, đang chờ xác nhận chính thức trước khi chi trả.</div>
+<div class="ph-alert amber">
+  <div class="ph-alert-icon">{% include "icons/alert-triangle.svg" %}</div>
+  <div class="ph-alert-body">
+    <div class="ph-alert-title">Tạm tính — chưa xác minh</div>
+    <div class="ph-alert-desc">Số liệu tính từ dữ liệu sản lượng hàng ngày, đang chờ xác nhận chính thức trước khi chi trả.</div>
+  </div>
+</div>
 {% endif %}
 
-<form method="get" class="filter-bar">
-  <label>Bưu cục</label>
-  <select name="bc" onchange="this.form.submit()">
-    <option value="">Tất cả bưu cục</option>
-    {% for o in office_choices %}
-      <option value="{{ o.code }}" {% if o.code == selected_office %}selected{% endif %}>{{ o.code }} - {{ o.name }}</option>
+<!-- ===================== KPI ===================== -->
+<div class="ph-kpi-grid">
+  <div class="ph-kpi emphasis">
+    <div class="ph-kpi-top">
+      <div>
+        <div class="ph-kpi-label">Tổng thu nhập trong kỳ</div>
+        <div class="ph-kpi-value">{{ totals.total|vn_currency }}</div>
+      </div>
+      <div class="ph-kpi-icon">{% include "icons/wallet.svg" %}</div>
+    </div>
+    {% if prev_compare %}
+    <span class="ph-trend {% if prev_compare.total_delta > 0 %}up{% elif prev_compare.total_delta < 0 %}down{% else %}flat{% endif %}">
+      {% if prev_compare.total_delta > 0 %}{% include "icons/trend-up.svg" %}{% elif prev_compare.total_delta < 0 %}{% include "icons/trend-down.svg" %}{% endif %}
+      {{ prev_compare.total_delta|vn_signed_percent }} so với tháng {{ prev_compare.month }}/{{ prev_compare.year }}
+    </span>
+    {% else %}
+    <span class="ph-kpi-sub">Chưa có dữ liệu tháng trước để so sánh</span>
+    {% endif %}
+  </div>
+
+  <div class="ph-kpi">
+    <div class="ph-kpi-top">
+      <div>
+        <div class="ph-kpi-label">Công theo sản lượng</div>
+        <div class="ph-kpi-value">{{ totals.piece_rate|vn_currency }}</div>
+      </div>
+      <div class="ph-kpi-icon">{% include "icons/box.svg" %}</div>
+    </div>
+    {% if prev_compare.piece_rate_delta is not None %}
+    <span class="ph-trend {% if prev_compare.piece_rate_delta > 0 %}up{% elif prev_compare.piece_rate_delta < 0 %}down{% else %}flat{% endif %}">
+      {% if prev_compare.piece_rate_delta > 0 %}{% include "icons/trend-up.svg" %}{% elif prev_compare.piece_rate_delta < 0 %}{% include "icons/trend-down.svg" %}{% endif %}
+      {{ prev_compare.piece_rate_delta|vn_signed_percent }} so với tháng trước
+    </span>
+    {% else %}
+    <span class="ph-kpi-sub">Chưa có dữ liệu tháng trước để so sánh</span>
+    {% endif %}
+  </div>
+
+  <div class="ph-kpi">
+    <div class="ph-kpi-top">
+      <div>
+        <div class="ph-kpi-label">Tổng hỗ trợ</div>
+        <div class="ph-kpi-value">{{ totals.allowance|vn_currency }}</div>
+      </div>
+      <div class="ph-kpi-icon">{% include "icons/tag.svg" %}</div>
+    </div>
+    <span class="ph-kpi-sub">Khoản hỗ trợ/cố định đã nhập trong kỳ</span>
+  </div>
+
+  <div class="ph-kpi">
+    <div class="ph-kpi-top">
+      <div>
+        <div class="ph-kpi-label">Số lao động có dữ liệu</div>
+        <div class="ph-kpi-value">{{ totals.so_lao_dong|vn_number }}<span class="ph-kpi-unit">người</span></div>
+      </div>
+      <div class="ph-kpi-icon">{% include "icons/users.svg" %}</div>
+    </div>
+    <span class="ph-kpi-sub">{{ by_office|length }} bưu cục{% if selected_office %} (đang lọc theo {{ selected_office }}){% endif %}</span>
+  </div>
+</div>
+
+<!-- ===================== By office ===================== -->
+<div class="ph-section">
+  <div class="ph-section-head">
+    <h2>Theo bưu cục</h2>
+    <span class="ph-section-note">Tháng {{ month }}/{{ year }}</span>
+  </div>
+  <div class="card">
+    <div class="ph-office-layout">
+      {% if by_office %}
+      <div class="ph-donut-wrap">
+        <svg width="120" height="120" viewBox="0 0 100 100" style="transform:rotate(-90deg)">
+          <circle cx="50" cy="50" r="40" fill="none" stroke="#eef1f5" stroke-width="14"/>
+          {% for o in by_office %}
+          <circle cx="50" cy="50" r="40" fill="none" stroke="{{ o.color }}" stroke-width="14"
+            stroke-dasharray="{{ o.donut_dasharray }}" stroke-dashoffset="{{ o.donut_dashoffset }}">
+            <title>{{ o.employee__post_office__name }}: {{ o.ty_trong|vn_number:1 }}%</title>
+          </circle>
+          {% endfor %}
+        </svg>
+      </div>
+      {% endif %}
+      <div class="ph-office-table-wrap">
+        <div class="table-wrap">
+        <table>
+          <thead><tr><th class="text">Bưu cục</th><th>Số lao động</th><th>Công sản lượng</th><th>Hỗ trợ</th><th>Tổng</th><th>Tỷ trọng</th></tr></thead>
+          <tbody>
+          {% for o in by_office %}
+          <tr>
+            <td class="text"><span class="ph-dot" style="background:{{ o.color }}"></span>{{ o.employee__post_office__code }} - {{ o.employee__post_office__name }}</td>
+            <td>{{ o.so_lao_dong }}</td>
+            <td>{{ o.piece_rate|vn_currency }}</td>
+            <td>{{ o.allowance|vn_currency }}</td>
+            <td>{{ o.total|vn_currency }}</td>
+            <td><span class="ph-bar-track"><span class="ph-bar-fill" style="width:{{ o.ty_trong|floatformat:0 }}%;background:{{ o.color }}"></span></span>{{ o.ty_trong|vn_number:1 }}%</td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="6" class="text"><i>Chưa có dữ liệu.</i></td></tr>
+          {% endfor %}
+          </tbody>
+          {% if by_office %}
+          <tfoot>
+            <tr class="total"><td class="text">Tổng cộng</td><td>{{ totals.so_lao_dong }}</td><td>{{ totals.piece_rate|vn_currency }}</td><td>{{ totals.allowance|vn_currency }}</td><td>{{ totals.total|vn_currency }}</td><td>100%</td></tr>
+          </tfoot>
+          {% endif %}
+        </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== By employee ===================== -->
+<div class="ph-section">
+  <div class="ph-section-head">
+    <h2>Chi tiết theo lao động</h2>
+    <span class="ph-section-note" id="ph-visible-count"></span>
+  </div>
+
+  <div class="ph-toolbar">
+    <form method="get" style="margin:0">
+      <select name="bc" onchange="this.form.submit()">
+        <option value="">Tất cả bưu cục</option>
+        {% for o in office_choices %}
+        <option value="{{ o.code }}" {% if o.code == selected_office %}selected{% endif %}>{{ o.code }} - {{ o.name }}</option>
+        {% endfor %}
+      </select>
+    </form>
+    <div class="ph-search">
+      {% include "icons/search.svg" %}
+      <input type="text" placeholder="Tìm theo tên hoặc mã HRM" data-emp-search aria-label="Tìm nhân viên">
+    </div>
+    <div class="ph-toolbar-spacer"></div>
+    <label class="note" for="ph-page-size">Số dòng/trang</label>
+    <select id="ph-page-size" data-page-size>
+      <option value="20">20</option>
+      <option value="50" selected>50</option>
+      <option value="1000">Tất cả</option>
+    </select>
+  </div>
+
+  <div class="ph-emp-table-wrap" id="ph-emp-table-wrap">
+    <table class="ph-emp-table" id="ph-emp-table">
+      <thead>
+        <tr>
+          <th class="text" data-sort="name"><span class="th-inner">Nhân viên {% include "icons/sort.svg" %}</span></th>
+          <th class="text">Bưu cục</th>
+          <th data-sort="piece"><span class="th-inner">Công sản lượng {% include "icons/sort.svg" %}</span></th>
+          <th data-sort="allow"><span class="th-inner">Hỗ trợ {% include "icons/sort.svg" %}</span></th>
+          <th data-sort="total"><span class="th-inner">Tổng {% include "icons/sort.svg" %}</span></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for p in pays %}
+        <tr data-search="{{ p.employee.full_name|lower }} {{ p.employee.hrm_code }}"
+            data-name="{{ p.employee.full_name }}" data-piece="{{ p.piece_rate_amount }}" data-allow="{{ p.allowance_amount }}" data-total="{{ p.total_amount }}">
+          <td class="text">{{ p.employee.hrm_code }} — {{ p.employee.full_name }}</td>
+          <td class="text">{{ p.employee.post_office }}</td>
+          <td>{{ p.piece_rate_amount|vn_currency }}</td>
+          <td>{{ p.allowance_amount|vn_currency }}</td>
+          <td>{{ p.total_amount|vn_currency }}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="5" class="text"><i>Chưa có dữ liệu.</i></td></tr>
+        {% endfor %}
+      </tbody>
+      <tfoot>
+        <tr>
+          <td class="text" colspan="2">Tổng ({{ totals.so_lao_dong }} người)</td>
+          <td>{{ totals.piece_rate|vn_currency }}</td>
+          <td>{{ totals.allowance|vn_currency }}</td>
+          <td>{{ totals.total|vn_currency }}</td>
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+
+  <!-- Mobile: employee cards -->
+  <div class="ph-empcards" id="ph-empcards">
+    {% for p in pays %}
+    <div class="ph-empcard" data-search="{{ p.employee.full_name|lower }} {{ p.employee.hrm_code }}" data-name="{{ p.employee.full_name }}" data-piece="{{ p.piece_rate_amount }}" data-allow="{{ p.allowance_amount }}" data-total="{{ p.total_amount }}">
+      <div>
+        <div class="name">{{ p.employee.full_name }}</div>
+        <div class="office">{{ p.employee.hrm_code }} · {{ p.employee.post_office }}</div>
+      </div>
+      <div class="ph-empcard-total">{{ p.total_amount|vn_currency }}<br><span class="ph-empcard-sub">SL {{ p.piece_rate_amount|vn_currency }} · HT {{ p.allowance_amount|vn_currency }}</span></div>
+    </div>
+    {% empty %}
+    <div class="note" style="text-align:center;padding:8px">Chưa có dữ liệu.</div>
     {% endfor %}
-  </select>
-  <a class="btn secondary" href="{% url 'export_excel' year month %}{% if selected_office %}?bc={{ selected_office }}{% endif %}">Xuất Excel</a>
-</form>
+  </div>
 
-<h2>Theo bưu cục</h2>
-<div class="table-wrap">
-<table>
-<thead><tr><th class="text">Mã BC</th><th class="text">Tên BC</th><th>Số lao động</th><th>Công sản lượng</th><th>Hỗ trợ</th><th>Tổng</th></tr></thead>
-<tbody>
-{% for o in by_office %}
-<tr>
-  <td class="text">{{ o.employee__post_office__code }}</td>
-  <td class="text">{{ o.employee__post_office__name }}</td>
-  <td>{{ o.so_lao_dong }}</td>
-  <td>{{ o.piece_rate|floatformat:0 }}</td>
-  <td>{{ o.allowance|floatformat:0 }}</td>
-  <td>{{ o.total|floatformat:0 }}</td>
-</tr>
-{% empty %}
-<tr><td colspan="6" class="text"><i>Chưa có dữ liệu.</i></td></tr>
-{% endfor %}
-</tbody>
-</table>
+  <div class="ph-pager">
+    <span id="ph-pager-info"></span>
+    <div class="ph-pager-btns">
+      <button type="button" data-page-prev>{% include "icons/chevrons-left.svg" %}</button>
+      <span id="ph-pager-current">1</span>
+      <button type="button" data-page-next style="transform:scaleX(-1)">{% include "icons/chevrons-left.svg" %}</button>
+    </div>
+  </div>
 </div>
 
-<h2>Chi tiết theo lao động{% if selected_office %} — {{ selected_office }}{% endif %}</h2>
-<div class="table-wrap">
-<table>
-<thead><tr><th class="text">Mã HRM</th><th class="text">Họ tên</th><th class="text">Bưu cục</th><th>Công sản lượng</th><th>Hỗ trợ</th><th>Tổng</th></tr></thead>
-<tbody>
-{% for p in pays %}
-<tr>
-  <td class="text">{{ p.employee.hrm_code }}</td>
-  <td class="text">{{ p.employee.full_name }}</td>
-  <td class="text">{{ p.employee.post_office }}</td>
-  <td>{{ p.piece_rate_amount|floatformat:0 }}</td>
-  <td>{{ p.allowance_amount|floatformat:0 }}</td>
-  <td>{{ p.total_amount|floatformat:0 }}</td>
-</tr>
-{% empty %}
-<tr><td colspan="6" class="text"><i>Chưa có dữ liệu.</i></td></tr>
-{% endfor %}
-</tbody>
-</table>
-</div>
+<script>
+(function () {
+  var table = document.getElementById("ph-emp-table");
+  if (!table) return;
+  var tbody = table.querySelector("tbody");
+  var allRows = Array.prototype.slice.call(tbody.querySelectorAll("tr[data-search]"));
+  var cardsWrap = document.getElementById("ph-empcards");
+  var allCards = cardsWrap ? Array.prototype.slice.call(cardsWrap.querySelectorAll(".ph-empcard")) : [];
+
+  var state = { search: "", sortKey: "total", sortDir: -1, page: 1, pageSize: 50 };
+
+  function matches(el) {
+    if (!state.search) return true;
+    return (el.getAttribute("data-search") || "").indexOf(state.search.toLowerCase()) !== -1;
+  }
+
+  function sortEls(els) {
+    var attr = state.sortKey === "name" ? "data-name" : "data-" + state.sortKey;
+    return els.slice().sort(function (a, b) {
+      if (state.sortKey === "name") {
+        return a.getAttribute(attr).localeCompare(b.getAttribute(attr)) * state.sortDir;
+      }
+      var av = parseFloat(a.getAttribute(attr)) || 0, bv = parseFloat(b.getAttribute(attr)) || 0;
+      return (av - bv) * state.sortDir;
+    });
+  }
+
+  function render() {
+    var filtered = allRows.filter(matches);
+    var sorted = sortEls(filtered);
+    var totalPages = Math.max(1, Math.ceil(sorted.length / state.pageSize));
+    if (state.page > totalPages) state.page = totalPages;
+    var start = (state.page - 1) * state.pageSize;
+    var visible = sorted.slice(start, start + state.pageSize);
+
+    allRows.forEach(function (r) { r.style.display = "none"; });
+    visible.forEach(function (r) { r.style.display = ""; tbody.appendChild(r); });
+
+    var filteredCards = allCards.filter(matches);
+    allCards.forEach(function (c) { c.style.display = filteredCards.indexOf(c) === -1 ? "none" : ""; });
+
+    document.getElementById("ph-visible-count").textContent = filtered.length + " / " + allRows.length + " người";
+    document.getElementById("ph-pager-info").textContent = "Trang " + state.page + " / " + totalPages + " (" + filtered.length + " người)";
+    document.getElementById("ph-pager-current").textContent = state.page;
+    document.querySelector("[data-page-prev]").disabled = state.page <= 1;
+    document.querySelector("[data-page-next]").disabled = state.page >= totalPages;
+  }
+
+  var searchInput = document.querySelector("[data-emp-search]");
+  if (searchInput) {
+    searchInput.addEventListener("input", function () {
+      state.search = searchInput.value.trim();
+      state.page = 1;
+      render();
+    });
+  }
+
+  var pageSizeSelect = document.querySelector("[data-page-size]");
+  if (pageSizeSelect) {
+    pageSizeSelect.addEventListener("change", function () {
+      state.pageSize = parseInt(pageSizeSelect.value, 10) || 50;
+      state.page = 1;
+      render();
+    });
+  }
+
+  table.querySelectorAll("th[data-sort]").forEach(function (th) {
+    th.addEventListener("click", function () {
+      var key = th.getAttribute("data-sort");
+      if (state.sortKey === key) { state.sortDir *= -1; } else { state.sortKey = key; state.sortDir = 1; }
+      render();
+    });
+  });
+
+  document.querySelector("[data-page-prev]").addEventListener("click", function () { state.page -= 1; render(); });
+  document.querySelector("[data-page-next]").addEventListener("click", function () { state.page += 1; render(); });
+
+  render();
+})();
+
+function phGoToPeriod(select) {
+  var val = select.value;
+  if (!val || val.indexOf("-") === -1) return;
+  var parts = val.split("-");
+  var bc = new URLSearchParams(window.location.search).get("bc");
+  window.location.href = "/luong/" + parts[0] + "/" + parseInt(parts[1], 10) + "/" + (bc ? "?bc=" + bc : "");
+}
+</script>
 {% endblock %}

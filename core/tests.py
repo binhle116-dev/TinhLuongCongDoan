@@ -1,9 +1,33 @@
+from decimal import Decimal
+
 from django.contrib.auth.models import User
 from django.test import Client, TestCase
 from django.urls import reverse
 
 from core.models import Employee, PositionCatalog, PostOffice, UserProfile
 from core.permissions import scope_post_office_choices, scope_queryset
+from core.templatetags.core_extras import vn_currency, vn_number, vn_signed_percent
+
+
+class VnFormatFilterTests(TestCase):
+    """Dinh dang so theo chuan Viet Nam - dung chung cho Khai thac va Phat
+    (chuyen tu khaithac/templatetags sang day, DEC-025)."""
+
+    def test_vn_number_groups_thousands_with_dot(self):
+        self.assertEqual(vn_number(1234567), "1.234.567")
+        self.assertEqual(vn_number(0), "0")
+        self.assertEqual(vn_number(None), "-")
+
+    def test_vn_number_decimals_use_comma(self):
+        self.assertEqual(vn_number(Decimal("37.30"), 2), "37,30")
+
+    def test_vn_currency_appends_dong_symbol(self):
+        self.assertEqual(vn_currency(30139370), "30.139.370 ₫")
+
+    def test_vn_signed_percent(self):
+        self.assertEqual(vn_signed_percent(Decimal("0.1523")), "+15,2%")
+        self.assertEqual(vn_signed_percent(Decimal("-0.0845")), "-8,5%")
+        self.assertIsNone(vn_signed_percent(None))
 
 
 class ScopeQuerysetTests(TestCase):

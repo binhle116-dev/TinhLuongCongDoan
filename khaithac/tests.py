@@ -17,7 +17,6 @@ from khaithac.models import (
 )
 from khaithac.services.employee_pay import compute_employee_shares
 from khaithac.services.pricing import compute_fund_breakdown, get_unit_price, load_price_cards
-from khaithac.templatetags.khaithac_extras import vn_currency, vn_number, vn_signed_percent
 
 
 class FundBreakdownTests(TestCase):
@@ -126,27 +125,6 @@ class EmployeeShareTests(TestCase):
         self.assertEqual(shares["tong_he_so_toan_don_vi"], Decimal("1.4"))
         self.assertEqual(shares["he_so_chua_gan"], Decimal("0.4"))
         self.assertEqual(len(shares["per_employee"]), 1)
-
-
-class VnFormatFilterTests(TestCase):
-    """Dinh dang so theo chuan Viet Nam dung trong trang Khai thac (khong
-    dong den cach hien thi so cua cac module khac)."""
-
-    def test_vn_number_groups_thousands_with_dot(self):
-        self.assertEqual(vn_number(1234567), "1.234.567")
-        self.assertEqual(vn_number(0), "0")
-        self.assertEqual(vn_number(None), "-")
-
-    def test_vn_number_decimals_use_comma(self):
-        self.assertEqual(vn_number(Decimal("37.30"), 2), "37,30")
-
-    def test_vn_currency_appends_dong_symbol(self):
-        self.assertEqual(vn_currency(30139370), "30.139.370 ₫")
-
-    def test_vn_signed_percent(self):
-        self.assertEqual(vn_signed_percent(Decimal("0.1523")), "+15,2%")
-        self.assertEqual(vn_signed_percent(Decimal("-0.0845")), "-8,5%")
-        self.assertIsNone(vn_signed_percent(None))
 
 
 class DashboardDisplayHelperTests(TestCase):
