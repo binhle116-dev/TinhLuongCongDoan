@@ -23,7 +23,7 @@ from pathlib import Path
 import openpyxl
 from django.core.management.base import BaseCommand
 
-from core.models import Employee, PostOffice
+from core.models import Employee, PositionCatalog, PostOffice
 
 DEFAULT_FILE = Path(r"D:\ONEDRIVE\Trung tam Van hanh - BDTP Hue 05.2025\2026\Lao dong\DS nhân sự TTVH (27.8.2026).xlsx")
 
@@ -57,6 +57,24 @@ def normalize_hrm(value) -> str:
     if text.endswith(".0"):
         text = text[:-2]
     return text.zfill(8)
+
+
+def resolve_position(raw_text: str, cache: dict) -> PositionCatalog | None:
+    """Chuc danh la droplist theo danh muc (PositionCatalog), khong con la
+    chuoi nhap tu do - tu tao moi trong danh muc neu chua co (vd nhan vien
+    moi voi chuc danh chua tung xuat hien)."""
+    raw_text = (raw_text or "").strip()
+    if not raw_text:
+        return None
+    if raw_text in cache:
+        return cache[raw_text]
+    if " - " in raw_text:
+        code, name = raw_text.split(" - ", 1)
+    else:
+        code, name = raw_text, raw_text
+    obj, _ = PositionCatalog.objects.get_or_create(code=code.strip(), defaults={"name": name.strip()})
+    cache[raw_text] = obj
+    return obj
 
 
 def guess_contract_type(loai_hd_text: str) -> str:
@@ -95,6 +113,7 @@ class Command(BaseCommand):
         ws = wb["Tổng"]
         rows = list(ws.iter_rows(values_only=True))
 
+        position_cache: dict = {}
         created, updated, skipped = 0, 0, 0
         for r in rows[1:]:
             hrm_raw = r[1]
@@ -127,7 +146,7 @@ class Command(BaseCommand):
                     "full_name": full_name,
                     "post_office": office,
                     "contract_type": guess_contract_type(loai_hd_text),
-                    "position": position,
+                    "position": resolve_position(position, position_cache),
                     "is_active": True,
                 },
             )

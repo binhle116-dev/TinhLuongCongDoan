@@ -2,7 +2,7 @@ from django.contrib.auth.models import User
 from django.test import Client, TestCase
 from django.urls import reverse
 
-from core.models import Employee, PostOffice, UserProfile
+from core.models import Employee, PositionCatalog, PostOffice, UserProfile
 from core.permissions import scope_post_office_choices, scope_queryset
 
 
@@ -122,3 +122,14 @@ class EmployeeScopingViewTests(TestCase):
     def test_dashboard_loads_for_anonymous_redirects_to_login(self):
         resp = self.client.get(reverse("dashboard"))
         self.assertEqual(resp.status_code, 302)
+
+    def test_employee_edit_form_renders_position_as_dropdown(self):
+        # Yeu cau PO: Chuc danh phai la droplist theo danh muc, khong con
+        # la o nhap tu do.
+        pos = PositionCatalog.objects.create(code="196", name="Buu ta")
+        self.emp_a.position = pos
+        self.emp_a.save()
+        self.client.login(username="view_truong_a", password="x")
+        resp = self.client.get(reverse("employee_edit", args=[self.emp_a.pk]))
+        self.assertContains(resp, '<select name="position"', html=False)
+        self.assertContains(resp, "196 - Buu ta")

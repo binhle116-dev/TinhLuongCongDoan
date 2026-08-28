@@ -34,6 +34,22 @@ class PostOffice(TimeStampedModel):
         return f"{self.code} - {self.name}"
 
 
+class PositionCatalog(models.Model):
+    """Danh muc chuc danh chinh thuc (ma + ten), dung lam droplist khi
+    sua nhan vien - thay cho nhap tu do. Sua/them qua trang quan tri."""
+
+    code = models.CharField("Ma chuc danh", max_length=20, unique=True)
+    name = models.CharField("Ten chuc danh", max_length=255)
+
+    class Meta:
+        verbose_name = "Chuc danh"
+        verbose_name_plural = "Danh muc chuc danh"
+        ordering = ["code"]
+
+    def __str__(self):
+        return f"{self.code} - {self.name}"
+
+
 class Employee(TimeStampedModel):
     CONTRACT_HDLD = "HDLD"
     CONTRACT_LDTK = "LDTK"
@@ -54,7 +70,10 @@ class Employee(TimeStampedModel):
     contract_type = models.CharField(
         "Loai hop dong", max_length=10, choices=CONTRACT_CHOICES, blank=True
     )
-    position = models.CharField("Chuc danh", max_length=255, blank=True)
+    position = models.ForeignKey(
+        PositionCatalog, verbose_name="Chuc danh", null=True, blank=True,
+        on_delete=models.PROTECT, related_name="employees",
+    )
     is_active = models.BooleanField("Dang lam viec", default=True)
     start_date = models.DateField("Ngay vao", null=True, blank=True)
 
