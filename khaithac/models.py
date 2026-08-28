@@ -43,9 +43,10 @@ class KhaiThacImportBatch(TimeStampedModel):
 class KhaiThacServiceMapping(models.Model):
     """Anh xa 'Loai' tho (nhu trong script SQL cua don vi: R_TN, E_TN, KT1...)
     sang 1 trong 4 'Nhom dich vu' dung de tinh don gia theo VB1054/1182.
-    Nhung Loai chua co Nhom (vd KT1) se KHONG duoc tinh vao Quy tien luong
-    cho toi khi duoc anh xa - tranh doan bua, giong nguyen tac da dung o
-    module Phat (ServiceMapping)."""
+    Nhung Loai chua co Nhom se KHONG duoc tinh vao Quy tien luong cho toi
+    khi duoc PO/TCHC xac nhan va anh xa - tranh doan bua, giong nguyen tac
+    da dung o module Phat (ServiceMapping). VD: KT1 (ma buu gui prefix 'M')
+    ban dau de trong, PO xac nhan thuoc Nhom EMS ngay 2026-08-28 (DEC-018)."""
 
     NHOM_EMS = "EMS"
     NHOM_GHI_SO = "GHI_SO"

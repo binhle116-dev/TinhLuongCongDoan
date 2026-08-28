@@ -149,7 +149,8 @@ python manage.py import_khaithac_shift_roster --thang 2026-07
 
 Xem ket qua tai `/khai-thac/` (Quy tien luong + luong tung nhan vien theo
 ca/ngay/thang) va `/khai-thac/chua-anh-xa/` (Loai chua duoc xac dinh Nhom
-dich vu - hien tai la `KT1`, can PO/TCHC xac nhan).
+dich vu - hien khong con Loai nao chua anh xa, ke ca `KT1` da duoc PO xac
+nhan thuoc Nhom EMS - DEC-018).
 
 **QUAN TRONG - chua lam xong**: He so chat luong thang
 (`KhaiThacQualityCoefficient`, VB1054 muc 1.4, Phu luc 01) hien mac dinh

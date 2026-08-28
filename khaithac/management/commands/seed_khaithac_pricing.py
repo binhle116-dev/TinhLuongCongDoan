@@ -9,16 +9,16 @@
 Nhom dich vu theo dinh nghia dich vu (khong phan biet TN/QT/COD trong don
 gia Khai thac - khac module Phat):
   - GHI_SO (Bao dam)  <- R_TN, R_COD, R_QT
-  - EMS               <- E_TN, E_COD, E_QT
+  - EMS               <- E_TN, E_COD, E_QT, KT1
   - BUU_KIEN (Parcel) <- C_TN, C_COD, C_QT
   - PHBC (Bao chi)    <- U_TN, U_COD  (ServiceCode 'U'/'P' = Phat hanh bao chi)
 
-KT1 (ma buu gui bat dau bang 'M') CO CHU DINH de trong (chua anh xa) - VB
-1054/1182 khong nhac den mot Nhom rieng cho KT1 trong bang don gia Khai
-thac (KT1 trong bang don gia Cong doan PHAT la 1 SAN PHAM rieng, KHAC
-nghia voi ma "KT1" dung trong script SQL cua don vi Khai thac cho ma buu
-gui prefix 'M' - trung ten ngau nhien). Can PO/TCHC xac nhan KT1(M) thuoc
-Nhom nao truoc khi tinh vao Quy tien luong - xem /khai-thac/chua-anh-xa/.
+KT1 (ma buu gui bat dau bang 'M') duoc PO xac nhan thuoc Nhom EMS
+(2026-08-28, xem DEC-018) - truoc do CO CHU DINH de trong cho toi khi co
+xac nhan nay, vi VB1054/1182 khong nhac ten mot Nhom rieng cho no trong
+bang don gia Khai thac (KT1 trong bang don gia Cong doan PHAT la 1 SAN
+PHAM rieng, KHAC nghia voi ma "KT1" dung trong script SQL cua don vi Khai
+thac cho ma buu gui prefix 'M' - trung ten ngau nhien).
 """
 from __future__ import annotations
 
@@ -40,7 +40,7 @@ MAPPING_RULES = {
     "C_QT": KhaiThacServiceMapping.NHOM_BUU_KIEN,
     "U_TN": KhaiThacServiceMapping.NHOM_PHBC,
     "U_COD": KhaiThacServiceMapping.NHOM_PHBC,
-    "KT1": None,  # co chu dinh de trong - xem docstring
+    "KT1": KhaiThacServiceMapping.NHOM_EMS,  # PO xac nhan 2026-08-28, xem DEC-018
 }
 
 PRICE_PERIODS = [
