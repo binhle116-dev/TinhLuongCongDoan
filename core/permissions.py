@@ -37,6 +37,16 @@ def scope_queryset(queryset, user, field_name="post_office"):
     return queryset.filter(**{field_name: post_office})
 
 
+def user_can_access_post_office(user, post_office) -> bool:
+    """True neu user duoc xem du lieu cua post_office nay: Admin/Phong ban/
+    superuser luon True; Truong buu cuc chi True voi dung buu cuc cua ho.
+    Dung khi can loc theo 1 ma buu cuc CU THE truoc (vd cong doan Khai thac
+    chi co 1 buu cuc '530100') - khac scope_post_office_choices() (tra ve
+    danh sach de chon)."""
+    scoped = user_scope_post_office(user)
+    return scoped is None or scoped.pk == post_office.pk
+
+
 def scope_post_office_choices(user):
     """Tra ve danh sach PostOffice user duoc chon (vd dropdown loc theo
     BCVH). Khac scope_queryset() thong thuong: PostOffice khong co truong

@@ -7,7 +7,12 @@ from django.shortcuts import get_object_or_404, redirect, render
 
 from core.forms import EmployeeForm
 from core.models import Employee, PostOffice
-from core.permissions import scope_post_office_choices, scope_queryset, user_scope_post_office
+from core.permissions import (
+    scope_post_office_choices,
+    scope_queryset,
+    user_can_access_post_office,
+    user_scope_post_office,
+)
 
 KHAITHAC_POST_OFFICE_CODE = "530100"
 
@@ -40,11 +45,12 @@ def _khaithac_summary(user, year, month, selected_office):
     if selected_office and selected_office != KHAITHAC_POST_OFFICE_CODE:
         return None  # buu cuc dang chon khac buu cuc Khai thac
 
-    post_office = scope_queryset(
-        PostOffice.objects.filter(code=KHAITHAC_POST_OFFICE_CODE), user
-    ).first()
-    if post_office is None:
-        return None  # ngoai pham vi tai khoan (RBAC) hoac chua co buu cuc nay
+    try:
+        post_office = PostOffice.objects.get(code=KHAITHAC_POST_OFFICE_CODE)
+    except PostOffice.DoesNotExist:
+        return None
+    if not user_can_access_post_office(user, post_office):
+        return None  # ngoai pham vi tai khoan (RBAC)
 
     result = compute_fund_breakdown(post_office, year, month)
     shares = compute_employee_shares(post_office, year, month, result["tong_quy_tien_luong"])

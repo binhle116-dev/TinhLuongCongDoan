@@ -1,9 +1,12 @@
 import datetime as dt
 from decimal import Decimal
 
-from django.test import TestCase
+from django.contrib.auth.models import User
+from django.test import Client, TestCase
+from django.urls import reverse
 
-from core.models import Employee, PostOffice
+from core.models import Employee, PostOffice, UserProfile
+from khaithac import views as khaithac_views
 from khaithac.models import (
     KhaiThacImportBatch,
     KhaiThacPriceCard,
@@ -14,6 +17,7 @@ from khaithac.models import (
 )
 from khaithac.services.employee_pay import compute_employee_shares
 from khaithac.services.pricing import compute_fund_breakdown, get_unit_price, load_price_cards
+from khaithac.templatetags.khaithac_extras import vn_currency, vn_number, vn_signed_percent
 
 
 class FundBreakdownTests(TestCase):
@@ -122,3 +126,128 @@ class EmployeeShareTests(TestCase):
         self.assertEqual(shares["tong_he_so_toan_don_vi"], Decimal("1.4"))
         self.assertEqual(shares["he_so_chua_gan"], Decimal("0.4"))
         self.assertEqual(len(shares["per_employee"]), 1)
+
+
+class VnFormatFilterTests(TestCase):
+    """Dinh dang so theo chuan Viet Nam dung trong trang Khai thac (khong
+    dong den cach hien thi so cua cac module khac)."""
+
+    def test_vn_number_groups_thousands_with_dot(self):
+        self.assertEqual(vn_number(1234567), "1.234.567")
+        self.assertEqual(vn_number(0), "0")
+        self.assertEqual(vn_number(None), "-")
+
+    def test_vn_number_decimals_use_comma(self):
+        self.assertEqual(vn_number(Decimal("37.30"), 2), "37,30")
+
+    def test_vn_currency_appends_dong_symbol(self):
+        self.assertEqual(vn_currency(30139370), "30.139.370 ₫")
+
+    def test_vn_signed_percent(self):
+        self.assertEqual(vn_signed_percent(Decimal("0.1523")), "+15,2%")
+        self.assertEqual(vn_signed_percent(Decimal("-0.0845")), "-8,5%")
+        self.assertIsNone(vn_signed_percent(None))
+
+
+class DashboardDisplayHelperTests(TestCase):
+    """Ham tinh toan chi phuc vu hien thi (ty trong nhom dich vu, tong hop
+    theo ngay/ca cho bang) - khong dong den cong thuc quy tien luong that
+    trong pricing.py."""
+
+    def test_nhom_breakdown_shares_sum_to_100_percent(self):
+        result = {
+            "tong_san_luong_tinh_tien": 150,
+            "tong_quy_tien_luong": Decimal("1500"),
+            "by_nhom_thang": {
+                "EMS": {"so_luong": 100, "thanh_tien": Decimal("1000")},
+                "BUU_KIEN": {"so_luong": 50, "thanh_tien": Decimal("500")},
+            },
+        }
+        rows = khaithac_views._build_nhom_breakdown(result)
+        total_ty_trong_tien = sum((r["ty_trong_tien"] for r in rows), Decimal("0"))
+        self.assertEqual(total_ty_trong_tien, Decimal("100"))
+        self.assertEqual(rows[0]["code"], "EMS")  # thanh_tien cao hon -> dung dau
+
+    def test_daily_rows_totals_match_sum_of_days(self):
+        result = {
+            "by_ngay": {
+                dt.date(2026, 7, 1): {
+                    "ca": {"CA1": {"so_luong": 10, "thanh_tien": Decimal("100")}},
+                    "so_luong": 10, "thanh_tien": Decimal("100"),
+                },
+                dt.date(2026, 7, 2): {
+                    "ca": {"CA2": {"so_luong": 5, "thanh_tien": Decimal("50")}},
+                    "so_luong": 5, "thanh_tien": Decimal("50"),
+                },
+            }
+        }
+        rows, totals = khaithac_views._build_daily_rows(result)
+        self.assertEqual(len(rows), 2)
+        self.assertEqual(totals["so_luong"], 15)
+        self.assertEqual(totals["thanh_tien"], Decimal("150"))
+        self.assertEqual(totals["ca1"]["so_luong"], 10)
+        self.assertEqual(totals["ca2"]["so_luong"], 5)
+        # Ngay khong co ca nao trong 3 ca van tra ve 0, khong loi KeyError.
+        self.assertEqual(rows[0]["ca"]["CA3"]["so_luong"], 0)
+
+    def test_daily_rows_empty_when_no_data(self):
+        rows, totals = khaithac_views._build_daily_rows({"by_ngay": {}})
+        self.assertEqual(rows, [])
+        self.assertEqual(totals["so_luong"], 0)
+
+
+class DashboardViewTests(TestCase):
+    """Kiem tra o muc view: trang khong crash, ky truoc dung de so sanh
+    khi co du lieu that, va khong hien chi tiet ky thuat cho nguoi khong
+    phai Admin."""
+
+    def setUp(self):
+        self.po = PostOffice.objects.create(code="530100", name="KTC1 Hue 1")
+        KhaiThacServiceMapping.objects.create(loai_raw="E_TN", nhom_dich_vu=KhaiThacServiceMapping.NHOM_EMS)
+        KhaiThacPriceCard.objects.create(
+            nhom_dich_vu=KhaiThacServiceMapping.NHOM_EMS, unit_price=Decimal("300"),
+            effective_from=dt.date(2026, 1, 1), effective_to=None,
+        )
+        for month, so_luong in [(6, 50), (7, 100)]:
+            batch = KhaiThacImportBatch.objects.create(
+                post_office=self.po, production_date=dt.date(2026, month, 15)
+            )
+            KhaiThacRawProduction.objects.create(
+                import_batch=batch, post_office=self.po, production_date=dt.date(2026, month, 15),
+                ca="CA1", loai_raw="E_TN", weight_tier="<=2kg", so_luong=so_luong,
+            )
+
+        self.admin_user = User.objects.create_user("kt_view_admin", password="x")
+        UserProfile.objects.create(user=self.admin_user, role=UserProfile.ROLE_ADMIN)
+        self.truong = User.objects.create_user("kt_view_truong", password="x")
+        po_b = PostOffice.objects.create(code="B1", name="Buu cuc khac")
+        UserProfile.objects.create(user=self.truong, role=UserProfile.ROLE_TRUONG_BUU_CUC, post_office=po_b)
+        self.client = Client()
+
+    def test_dashboard_computes_real_previous_month_comparison(self):
+        self.client.login(username="kt_view_admin", password="x")
+        resp = self.client.get(reverse("khaithac_dashboard_month", args=[2026, 7]))
+        self.assertEqual(resp.status_code, 200)
+        # Thang 7 (100) tang gap doi so thang 6 (50) -> +100%.
+        self.assertContains(resp, "+100,0%")
+
+    def test_dashboard_no_previous_month_shows_honest_message_not_fake_number(self):
+        self.client.login(username="kt_view_admin", password="x")
+        resp = self.client.get(reverse("khaithac_dashboard_month", args=[2026, 6]))
+        self.assertContains(resp, "Chưa có dữ liệu tháng trước để so sánh")
+
+    def test_technical_command_hidden_from_non_admin(self):
+        self.truong.profile.post_office = self.po
+        self.truong.profile.save()
+        self.client.login(username="kt_view_truong", password="x")
+        resp = self.client.get(reverse("khaithac_dashboard_month", args=[2026, 7]))
+        self.assertNotContains(resp, "python manage.py")
+
+    def test_export_excel_downloads_for_scoped_user(self):
+        self.client.login(username="kt_view_admin", password="x")
+        resp = self.client.get(reverse("khaithac_export_excel", args=[2026, 7]))
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(
+            resp["Content-Type"],
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        )

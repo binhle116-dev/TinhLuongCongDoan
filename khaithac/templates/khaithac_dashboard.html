@@ -1,87 +1,649 @@
 {% extends "base.html" %}
-{% block title %}Khai thác{% endblock %}
-{% block page_title %}Khai thác — Quỹ tiền lương theo ca/ngày{% endblock %}
+{% load khaithac_extras %}
+{% block title %}Quỹ tiền lương Khai thác{% endblock %}
+{% block page_title %}Khai thác{% endblock %}
+
+{% block extra_head %}
+<style>
+/* ---- Page-scoped design tokens & components (chi dung trong trang nay) ---- */
+.kt-breadcrumb { font-size: 12.5px; color: var(--text-muted); margin-bottom: 6px; }
+.kt-breadcrumb a { color: var(--text-muted); text-decoration: none; }
+.kt-breadcrumb a:hover { color: var(--accent); text-decoration: underline; }
+.kt-header {
+  display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-start;
+  gap: 16px; margin-bottom: 20px;
+}
+.kt-header h1 { font-size: 22px; margin: 0 0 4px; font-weight: 700; }
+.kt-header .subtitle { color: var(--text-muted); font-size: 13.5px; margin: 0; }
+.kt-meta { display: flex; flex-wrap: wrap; gap: 14px; align-items: center; margin-top: 10px; font-size: 12.5px; color: var(--text-muted); }
+.kt-meta .sep { color: var(--border); }
+.kt-scope-badge {
+  display: inline-flex; align-items: center; gap: 6px; background: var(--accent-soft); color: var(--accent-dark);
+  padding: 3px 10px; border-radius: 999px; font-size: 12px; font-weight: 600;
+}
+.kt-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.kt-period-form { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-top: 12px; }
+.kt-period-form select { padding: 7px 10px; border: 1px solid var(--border); border-radius: 6px; font-size: 13.5px; background: #fff; }
+
+.kt-kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 22px; }
+.kt-kpi {
+  background: var(--card-bg); border: 1px solid var(--border); border-radius: 10px; padding: 16px 18px;
+  display: flex; flex-direction: column; gap: 10px; min-width: 0;
+}
+.kt-kpi.emphasis { border-color: #c9def8; background: linear-gradient(180deg, #f7fbff 0%, #ffffff 60%); }
+.kt-kpi-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
+.kt-kpi-icon { width: 34px; height: 34px; border-radius: 8px; background: var(--accent-soft); color: var(--accent-dark); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.kt-kpi-icon svg { width: 18px; height: 18px; }
+.kt-kpi-label { font-size: 12.5px; color: var(--text-muted); font-weight: 500; }
+.kt-kpi-value { font-size: 24px; font-weight: 700; line-height: 1.15; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.kt-kpi-unit { font-size: 12.5px; font-weight: 500; color: var(--text-muted); margin-left: 3px; }
+.kt-kpi-sub { font-size: 12px; color: var(--text-muted); }
+.kt-trend { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; font-weight: 600; padding: 2px 7px; border-radius: 999px; }
+.kt-trend svg { width: 12px; height: 12px; }
+.kt-trend.up { background: #e8f7ee; color: #1a8a4c; }
+.kt-trend.down { background: #fdeeee; color: #c23636; }
+.kt-trend.flat { background: #f1f3f5; color: var(--text-muted); }
+.kt-skel { background: linear-gradient(90deg, #edf0f3 25%, #f7f8fa 37%, #edf0f3 63%); background-size: 400% 100%; animation: kt-shimmer 1.4s ease infinite; border-radius: 6px; }
+@keyframes kt-shimmer { 0% { background-position: 100% 50%; } 100% { background-position: 0 50%; } }
+
+.kt-alert { display: flex; gap: 14px; padding: 16px 18px; border-radius: 10px; margin-bottom: 22px; border: 1px solid; }
+.kt-alert.amber { background: #fffaf0; border-color: #f3d999; }
+.kt-alert.red { background: #fdf1f1; border-color: #f0bcbc; }
+.kt-alert .kt-alert-icon { width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.kt-alert.amber .kt-alert-icon { background: #fdedc7; color: #8a5a00; }
+.kt-alert.red .kt-alert-icon { background: #f8d5d5; color: #96201f; }
+.kt-alert-icon svg { width: 20px; height: 20px; }
+.kt-alert-body { flex: 1; min-width: 0; }
+.kt-alert-title { font-weight: 700; font-size: 14.5px; margin-bottom: 3px; }
+.kt-alert-desc { font-size: 13px; color: var(--text-muted); margin-bottom: 10px; }
+.kt-alert-actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.kt-tech-details { margin-top: 10px; font-size: 12px; }
+.kt-tech-details summary { cursor: pointer; color: var(--text-muted); font-weight: 600; }
+.kt-tech-details pre { background: #1f2a37; color: #d7e2ee; padding: 10px 12px; border-radius: 8px; overflow-x: auto; margin: 8px 0 0; font-size: 11.5px; }
+
+.kt-section { margin-bottom: 26px; }
+.kt-section-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; margin-bottom: 12px; flex-wrap: wrap; }
+.kt-section-head h2 { margin: 0; font-size: 16px; font-weight: 700; }
+.kt-section-head .kt-section-note { font-size: 12.5px; color: var(--text-muted); }
+
+.kt-service-layout { display: flex; gap: 24px; flex-wrap: wrap; align-items: center; }
+.kt-donut-wrap { flex-shrink: 0; display: flex; align-items: center; gap: 18px; }
+.kt-donut-center { font-size: 11px; color: var(--text-muted); text-align: center; }
+.kt-donut-center strong { display: block; font-size: 15px; color: var(--text); }
+.kt-legend { display: flex; flex-direction: column; gap: 7px; font-size: 12.5px; }
+.kt-legend-dot { width: 9px; height: 9px; border-radius: 50%; display: inline-block; margin-right: 6px; flex-shrink: 0; }
+.kt-service-table-wrap { flex: 1; min-width: 320px; }
+.kt-bar-track { background: #eef1f5; border-radius: 999px; height: 6px; width: 72px; overflow: hidden; display: inline-block; vertical-align: middle; margin-right: 8px; }
+.kt-bar-fill { height: 100%; border-radius: 999px; }
+
+.kt-toolbar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 14px; }
+.kt-seg { display: inline-flex; border: 1px solid var(--border); border-radius: 7px; overflow: hidden; background: #fff; }
+.kt-seg button { border: none; background: transparent; padding: 6px 12px; font-size: 12.5px; cursor: pointer; color: var(--text-muted); border-right: 1px solid var(--border); }
+.kt-seg button:last-child { border-right: none; }
+.kt-seg button.active { background: var(--accent); color: #fff; font-weight: 600; }
+.kt-search { position: relative; }
+.kt-search svg { position: absolute; left: 9px; top: 50%; transform: translateY(-50%); width: 15px; height: 15px; color: var(--text-muted); }
+.kt-search input { padding: 6px 10px 6px 30px; border: 1px solid var(--border); border-radius: 7px; font-size: 13px; width: 150px; }
+.kt-toolbar select { padding: 6px 8px; border: 1px solid var(--border); border-radius: 7px; font-size: 12.5px; }
+.kt-toolbar-spacer { flex: 1; }
+
+.kt-day-table-wrap { overflow: auto; border: 1px solid var(--border); border-radius: 10px; max-height: 620px; }
+table.kt-day-table { border-collapse: separate; border-spacing: 0; width: 100%; font-size: 13px; font-variant-numeric: tabular-nums; }
+table.kt-day-table th {
+  position: sticky; top: 0; z-index: 2; background: #f5f7fa; color: var(--text-muted);
+  font-size: 11px; text-transform: uppercase; letter-spacing: .03em; font-weight: 700;
+  padding: 9px 12px; border-bottom: 1px solid var(--border); white-space: nowrap; text-align: right;
+  cursor: pointer; user-select: none;
+}
+table.kt-day-table th.text, table.kt-day-table td.text { text-align: left; }
+table.kt-day-table th .th-inner { display: inline-flex; align-items: center; gap: 4px; }
+table.kt-day-table th .th-inner svg { width: 11px; height: 11px; opacity: .55; }
+table.kt-day-table th:first-child, table.kt-day-table td:first-child {
+  position: sticky; left: 0; z-index: 1; background: #fff; border-right: 1px solid var(--border);
+}
+table.kt-day-table th:first-child { z-index: 3; background: #f5f7fa; }
+table.kt-day-table td { padding: 8px 12px; border-bottom: 1px solid #eef1f5; text-align: right; vertical-align: middle; }
+table.kt-day-table tbody tr:nth-child(even) td { background: rgba(15, 35, 60, .015); }
+table.kt-day-table tbody tr:nth-child(even) td:first-child { background: #fbfcfd; }
+table.kt-day-table tbody tr:hover td { background: #eef4fc !important; }
+table.kt-day-table tr.is-today td:first-child { box-shadow: inset 3px 0 0 var(--accent); }
+table.kt-day-table tr.is-today .kt-date-badge { background: var(--accent); color: #fff; }
+table.kt-day-table tr.is-zero td { color: #b7bfc8; }
+table.kt-day-table tfoot td { position: sticky; bottom: 0; background: #f0f4f8; font-weight: 700; border-top: 2px solid var(--border); border-bottom: none; }
+table.kt-day-table tfoot td:first-child { background: #f0f4f8; }
+
+.kt-date-badge { display: inline-block; font-weight: 600; padding: 2px 7px; border-radius: 6px; }
+.kt-weekday { color: var(--text-muted); font-size: 11px; margin-left: 5px; }
+.kt-cell-main { font-weight: 600; }
+.kt-cell-unit { font-size: 10.5px; color: var(--text-muted); font-weight: 400; margin-left: 3px; }
+.kt-cell-sub { font-size: 11.5px; color: var(--text-muted); margin-top: 1px; }
+.kt-cell.hide-qty .kt-qty-line { display: none; }
+.kt-cell.hide-amt .kt-amt-line { display: none; }
+.kt-day-table.hide-ca2 .col-CA2, .kt-day-table.hide-ca3 .col-CA3, .kt-day-table.hide-ca1 .col-CA1 { display: none; }
+
+.kt-scroll-hint { display: none; font-size: 11.5px; color: var(--text-muted); margin: -6px 0 10px; align-items: center; gap: 5px; }
+
+.kt-daycards { display: none; flex-direction: column; gap: 10px; }
+.kt-daycard { border: 1px solid var(--border); border-radius: 10px; background: #fff; overflow: hidden; }
+.kt-daycard[open] summary { border-bottom: 1px solid var(--border); }
+.kt-daycard summary { list-style: none; cursor: pointer; padding: 12px 14px; display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+.kt-daycard summary::-webkit-details-marker { display: none; }
+.kt-daycard-total { text-align: right; }
+.kt-daycard-total .amt { font-weight: 700; font-variant-numeric: tabular-nums; }
+.kt-daycard-total .qty { font-size: 11.5px; color: var(--text-muted); }
+.kt-daycard-body { padding: 10px 14px 14px; }
+.kt-daycard-row { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px dashed var(--border); font-size: 13px; }
+.kt-daycard-row:last-child { border-bottom: none; }
+
+.kt-pager { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 12px; flex-wrap: wrap; font-size: 12.5px; color: var(--text-muted); }
+.kt-pager-btns { display: flex; gap: 6px; align-items: center; }
+.kt-pager-btns button { border: 1px solid var(--border); background: #fff; border-radius: 6px; padding: 5px 9px; cursor: pointer; }
+.kt-pager-btns button:disabled { opacity: .4; cursor: not-allowed; }
+
+.kt-empty-msg { text-align: center; padding: 8px; color: var(--text-muted); font-size: 13px; }
+
+@media (max-width: 1200px) { .kt-kpi-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 600px) { .kt-kpi-grid { grid-template-columns: 1fr; } }
+
+@media (max-width: 768px) {
+  .kt-day-table-wrap { display: none; }
+  .kt-daycards { display: flex; }
+  .kt-toolbar .kt-toolbar-hide-desktop-note { display: none; }
+  /* Card mobile hien tat ca ngay (khong phan trang) - an bo dem trang va
+     luon so dong/trang vi khong ap dung o dang the nay. */
+  .kt-pager, [data-page-size], label[for="kt-page-size"] { display: none; }
+}
+@media (min-width: 769px) {
+  .kt-scroll-hint.is-scrollable { display: inline-flex; }
+}
+</style>
+{% endblock %}
+
 {% block content %}
 
+<div class="kt-breadcrumb">
+  <a href="{% url 'dashboard' %}">Tổng quan</a> <span>/</span> Công đoạn khai thác <span>/</span> Quỹ tiền lương
+</div>
+
+<div class="kt-header">
+  <div>
+    <h1>Quỹ tiền lương khai thác</h1>
+    <p class="subtitle">Theo dõi sản lượng và tiền lương theo ngày, ca làm việc</p>
+    <div class="kt-meta">
+      {% if post_office %}<span class="kt-scope-badge">{% include "icons/layers.svg" %} {{ post_office.name }} ({{ post_office.code }})</span>{% endif %}
+      <span class="sep">•</span>
+      <span>Kỳ báo cáo: Tháng {{ month }}/{{ year }}</span>
+      {% if last_updated %}
+      <span class="sep">•</span>
+      <span>Cập nhật lần cuối: {{ last_updated|date:"d/m/Y H:i" }}</span>
+      {% endif %}
+    </div>
+    <div class="kt-period-form">
+      <label class="note" for="kt-period-select">Kỳ báo cáo</label>
+      <select id="kt-period-select" onchange="ktGoToPeriod(this)" aria-label="Chọn kỳ báo cáo">
+        {% for opt_y, opt_m, opt_label in period_options %}
+        <option value="{{ opt_y }}-{{ opt_m }}" {% if opt_y == year and opt_m == month %}selected{% endif %}>{{ opt_label }}</option>
+        {% endfor %}
+      </select>
+    </div>
+  </div>
+  <div class="kt-actions">
+    {% if result %}
+    <a class="btn secondary" href="{% url 'khaithac_export_excel' year month %}">{% include "icons/download.svg" %} Xuất Excel</a>
+    {% endif %}
+    {% if is_admin %}
+    <a class="btn secondary" href="/admin/khaithac/khaithacshiftassignment/" target="_blank" rel="noopener">{% include "icons/clipboard.svg" %} Quản lý bảng phân ca</a>
+    {% endif %}
+    <button type="button" class="btn secondary" disabled title="Làm mới dữ liệu cần chạy lệnh nhập liệu từ SQL Server (chỉ Quản trị viên vận hành thực hiện thủ công). Chưa hỗ trợ làm mới trực tiếp từ giao diện.">{% include "icons/refresh.svg" %} Làm mới dữ liệu</button>
+  </div>
+</div>
+
 {% if not post_office %}
-<div class="warn">Không có bưu cục Khai thác nào trong phạm vi tài khoản của bạn.</div>
+<div class="card">Không có bưu cục Khai thác nào trong phạm vi tài khoản của bạn.</div>
+
 {% elif not result %}
-<div class="warn">Chưa có dữ liệu sản lượng cho tháng {{ month }}/{{ year }}. Chạy lệnh
-<code>python manage.py import_khaithac_production --tu {{ year }}-{{ month|stringformat:"02d" }}-01 --den ...</code>.</div>
+<div class="kt-alert amber">
+  <div class="kt-alert-icon">{% include "icons/alert-triangle.svg" %}</div>
+  <div class="kt-alert-body">
+    <div class="kt-alert-title">Chưa có dữ liệu sản lượng tháng {{ month }}/{{ year }}</div>
+    <div class="kt-alert-desc">Quỹ tiền lương và các số liệu liên quan sẽ hiển thị ngay khi dữ liệu sản lượng của tháng này được nhập vào hệ thống.</div>
+    {% if is_admin %}
+    <details class="kt-tech-details">
+      <summary>Chi tiết kỹ thuật (Quản trị viên)</summary>
+      <pre>python manage.py import_khaithac_production --tu {{ year }}-{{ month|stringformat:"02d" }}-01 --den &lt;ngay-01-thang-ke-tiep&gt;</pre>
+    </details>
+    {% endif %}
+  </div>
+</div>
+
 {% else %}
 
+<!-- ===================== KPI ===================== -->
+<div class="kt-kpi-grid">
+  <div class="kt-kpi emphasis">
+    <div class="kt-kpi-top">
+      <div>
+        <div class="kt-kpi-label">Tổng quỹ lương trong kỳ</div>
+        <div class="kt-kpi-value">{{ result.tong_quy_tien_luong|vn_currency }}</div>
+      </div>
+      <div class="kt-kpi-icon">{% include "icons/wallet.svg" %}</div>
+    </div>
+    {% if prev_compare.fund_delta is not None %}
+    <span class="kt-trend {% if prev_compare.fund_delta > 0 %}up{% elif prev_compare.fund_delta < 0 %}down{% else %}flat{% endif %}">
+      {% if prev_compare.fund_delta > 0 %}{% include "icons/trend-up.svg" %}{% elif prev_compare.fund_delta < 0 %}{% include "icons/trend-down.svg" %}{% endif %}
+      {{ prev_compare.fund_delta|vn_signed_percent }} so với tháng {{ prev_compare.month }}/{{ prev_compare.year }}
+    </span>
+    {% else %}
+    <span class="kt-kpi-sub">Chưa có dữ liệu tháng trước để so sánh</span>
+    {% endif %}
+  </div>
+
+  <div class="kt-kpi">
+    <div class="kt-kpi-top">
+      <div>
+        <div class="kt-kpi-label">Tổng sản lượng tính tiền</div>
+        <div class="kt-kpi-value">{{ result.tong_san_luong_tinh_tien|vn_number }}<span class="kt-kpi-unit">bưu gửi</span></div>
+      </div>
+      <div class="kt-kpi-icon">{% include "icons/box.svg" %}</div>
+    </div>
+    {% if prev_compare.san_luong_delta is not None %}
+    <span class="kt-trend {% if prev_compare.san_luong_delta > 0 %}up{% elif prev_compare.san_luong_delta < 0 %}down{% else %}flat{% endif %}">
+      {% if prev_compare.san_luong_delta > 0 %}{% include "icons/trend-up.svg" %}{% elif prev_compare.san_luong_delta < 0 %}{% include "icons/trend-down.svg" %}{% endif %}
+      {{ prev_compare.san_luong_delta|vn_signed_percent }} so với tháng trước
+    </span>
+    {% else %}
+    <span class="kt-kpi-sub">Chưa có dữ liệu tháng trước để so sánh</span>
+    {% endif %}
+  </div>
+
+  <div class="kt-kpi">
+    <div class="kt-kpi-top">
+      <div>
+        <div class="kt-kpi-label">Đơn giá bình quân</div>
+        <div class="kt-kpi-value">{{ avg_unit_price|vn_currency }}<span class="kt-kpi-unit">/ cái</span></div>
+      </div>
+      <div class="kt-kpi-icon">{% include "icons/tag.svg" %}</div>
+    </div>
+    <span class="kt-kpi-sub">Quỹ lương ÷ sản lượng tính tiền cả kỳ</span>
+  </div>
+
+  <div class="kt-kpi">
+    <div class="kt-kpi-top">
+      <div>
+        <div class="kt-kpi-label">Độ phủ dữ liệu</div>
+        <div class="kt-kpi-value">{{ so_ngay_co_du_lieu }}<span class="kt-kpi-unit">ngày</span></div>
+      </div>
+      <div class="kt-kpi-icon">{% include "icons/calendar.svg" %}</div>
+    </div>
+    <span class="kt-kpi-sub">{{ so_ca_ghi_nhan|vn_number }} lượt ca đã ghi nhận sản lượng</span>
+  </div>
+</div>
+
+<!-- ===================== Alert: unmapped loai ===================== -->
 {% if result.unmapped_loai %}
-<div class="warn">
-  Có sản lượng <b>chưa được tính vào quỹ tiền lương</b> vì Loại chưa được ánh xạ vào Nhóm dịch vụ:
-  {% for loai, sl in result.unmapped_loai.items %}<b>{{ loai }}</b> ({{ sl }} cái){% if not forloop.last %}, {% endif %}{% endfor %}.
-  Xem <a href="{% url 'khaithac_unmatched_report' %}">trang chưa ánh xạ</a>.
+<div class="kt-alert red">
+  <div class="kt-alert-icon">{% include "icons/alert-triangle.svg" %}</div>
+  <div class="kt-alert-body">
+    <div class="kt-alert-title">Có sản lượng chưa được tính vào quỹ tiền lương</div>
+    <div class="kt-alert-desc">
+      {% for loai, sl in result.unmapped_loai.items %}<b>{{ loai }}</b> ({{ sl|vn_number }} cái){% if not forloop.last %}, {% endif %}{% endfor %}
+      chưa được ánh xạ vào Nhóm dịch vụ nên tạm thời không tính vào quỹ lương, tránh áp sai đơn giá.
+    </div>
+    {% if is_admin %}
+    <div class="kt-alert-actions"><a class="btn secondary" href="{% url 'khaithac_unmatched_report' %}">Xem trang chưa ánh xạ</a></div>
+    {% endif %}
+  </div>
 </div>
 {% endif %}
 
-<div class="stat-grid">
-  <div class="stat-tile"><div class="label">Quỹ tiền lương thực hiện (tháng {{ month }}/{{ year }})</div><div class="value">{{ result.tong_quy_tien_luong|floatformat:0 }}đ</div></div>
-  <div class="stat-tile"><div class="label">Sản lượng tính tiền</div><div class="value">{{ result.tong_san_luong_tinh_tien|floatformat:0 }}</div></div>
-  <div class="stat-tile"><div class="label">Bưu cục</div><div class="value">{{ post_office.code }}</div></div>
-</div>
-
-<h2>Lương từng nhân viên (theo Hệ số ca — VB1054 mục 1.3)</h2>
+<!-- ===================== Alert: shift roster missing ===================== -->
 {% if not shares.per_employee %}
-<div class="warn">Chưa có Bảng phân ca (KhaiThacShiftAssignment) cho tháng {{ month }}/{{ year }} — chạy
-<code>python manage.py import_khaithac_shift_roster --thang {{ year }}-{{ month|stringformat:"02d" }}</code>.</div>
-{% else %}
-<div class="stat-grid">
-  <div class="stat-tile"><div class="label">Đơn giá bình quân / hệ số ca</div><div class="value">{{ shares.don_gia_binh_quan|floatformat:0 }}đ</div></div>
-  <div class="stat-tile"><div class="label">Tổng hệ số ca toàn đơn vị</div><div class="value">{{ shares.tong_he_so_toan_don_vi }}</div></div>
-</div>
-{% if shares.he_so_chua_gan %}
-<div class="warn">Có {{ shares.he_so_chua_gan }} hệ số ca trong Bảng phân ca chưa khớp được với nhân viên nào (tên trên bảng chấm công không khớp danh sách nhân viên) — vẫn tính vào tổng hệ số toàn đơn vị nhưng KHÔNG có ai nhận phần này.</div>
-{% endif %}
-<div class="table-wrap">
-<table>
-<thead><tr><th class="text">Nhân viên</th><th>Tổng hệ số ca</th><th>Hệ số chất lượng</th><th>Tiền lương</th></tr></thead>
-<tbody>
-{% for row in shares.per_employee %}
-<tr>
-  <td class="text">{{ row.ten }}</td>
-  <td>{{ row.tong_he_so }}</td>
-  <td>{{ row.he_so_chat_luong }}</td>
-  <td>{{ row.tien_luong|floatformat:0 }}đ</td>
-</tr>
-{% endfor %}
-</tbody>
-</table>
+<div class="kt-alert amber">
+  <div class="kt-alert-icon">{% include "icons/alert-triangle.svg" %}</div>
+  <div class="kt-alert-body">
+    <div class="kt-alert-title">Chưa có bảng phân ca tháng {{ month|stringformat:"02d" }}/{{ year }}</div>
+    <div class="kt-alert-desc">Tiền lương từng nhân viên chưa thể được tổng hợp cho đến khi dữ liệu phân ca được cập nhật. Quỹ tiền lương chung của đơn vị (ở trên) vẫn được tính bình thường.</div>
+    <div class="kt-alert-actions">
+      {% if is_admin %}
+      <a class="btn secondary" href="/admin/khaithac/khaithacshiftassignment/add/" target="_blank" rel="noopener">Cập nhật bảng phân ca</a>
+      {% endif %}
+    </div>
+    {% if is_admin %}
+    <details class="kt-tech-details">
+      <summary>Chi tiết kỹ thuật (Quản trị viên)</summary>
+      <pre>python manage.py import_khaithac_shift_roster --thang {{ year }}-{{ month|stringformat:"02d" }}</pre>
+    </details>
+    {% endif %}
+  </div>
 </div>
 {% endif %}
 
-<h2>Theo Nhóm dịch vụ (cả tháng)</h2>
-<div class="table-wrap">
-<table>
-<thead><tr><th class="text">Nhóm dịch vụ</th><th>Sản lượng</th><th>Thành tiền</th></tr></thead>
-<tbody>
-{% for nhom, v in result.by_nhom_thang.items %}
-<tr><td class="text">{{ nhom }}</td><td>{{ v.so_luong }}</td><td>{{ v.thanh_tien|floatformat:0 }}đ</td></tr>
-{% endfor %}
-</tbody>
-</table>
+<!-- ===================== Service breakdown ===================== -->
+<div class="kt-section">
+  <div class="kt-section-head">
+    <h2>Cơ cấu theo nhóm dịch vụ</h2>
+    <span class="kt-section-note">Tháng {{ month }}/{{ year }}</span>
+  </div>
+  <div class="card">
+    <div class="kt-service-layout">
+      <div class="kt-donut-wrap">
+        <svg width="120" height="120" viewBox="0 0 100 100" style="transform:rotate(-90deg)">
+          <circle cx="50" cy="50" r="40" fill="none" stroke="#eef1f5" stroke-width="14"/>
+          {% for row in nhom_breakdown %}
+          <circle cx="50" cy="50" r="40" fill="none" stroke="{{ row.color }}" stroke-width="14"
+            stroke-dasharray="{{ row.donut_dasharray }}" stroke-dashoffset="{{ row.donut_dashoffset }}">
+            <title>{{ row.label }}: {{ row.ty_trong_tien|vn_number:1 }}%</title>
+          </circle>
+          {% endfor %}
+        </svg>
+        <div class="kt-legend">
+          {% for row in nhom_breakdown %}
+          <div><span class="kt-legend-dot" style="background:{{ row.color }}"></span>{{ row.label }} <span class="note">({{ row.ty_trong_tien|vn_number:1 }}%)</span></div>
+          {% endfor %}
+        </div>
+      </div>
+      <div class="kt-service-table-wrap">
+        <div class="table-wrap">
+        <table>
+          <thead><tr><th class="text">Nhóm dịch vụ</th><th>Sản lượng</th><th>Tỷ trọng SL</th><th>Thành tiền</th><th>Tỷ trọng quỹ</th></tr></thead>
+          <tbody>
+          {% for row in nhom_breakdown %}
+          <tr>
+            <td class="text"><span class="kt-legend-dot" style="background:{{ row.color }}"></span>{{ row.label }}</td>
+            <td>{{ row.so_luong|vn_number }}</td>
+            <td><span class="kt-bar-track"><span class="kt-bar-fill" style="width:{{ row.ty_trong_sl|floatformat:0 }}%;background:{{ row.color }}"></span></span>{{ row.ty_trong_sl|vn_number:1 }}%</td>
+            <td>{{ row.thanh_tien|vn_currency }}</td>
+            <td><span class="kt-bar-track"><span class="kt-bar-fill" style="width:{{ row.ty_trong_tien|floatformat:0 }}%;background:{{ row.color }}"></span></span>{{ row.ty_trong_tien|vn_number:1 }}%</td>
+          </tr>
+          {% endfor %}
+          </tbody>
+          <tfoot>
+            <tr class="total"><td class="text">Tổng cộng</td><td>{{ result.tong_san_luong_tinh_tien|vn_number }}</td><td>100%</td><td>{{ result.tong_quy_tien_luong|vn_currency }}</td><td>100%</td></tr>
+          </tfoot>
+        </table>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
 
-<h2>Theo ngày / ca</h2>
-<div class="table-wrap">
-<table>
-<thead><tr><th class="text">Ngày</th><th class="text">Ca 1</th><th class="text">Ca 2</th><th class="text">Ca 3</th><th>Tổng ngày</th></tr></thead>
-<tbody>
-{% for ngay, v in result.by_ngay.items %}
-<tr>
-  <td class="text">{{ ngay|date:"d/m/Y" }}</td>
-  <td class="text">{{ v.ca.CA1.so_luong|default:0 }} cái — {{ v.ca.CA1.thanh_tien|floatformat:0|default:0 }}đ</td>
-  <td class="text">{{ v.ca.CA2.so_luong|default:0 }} cái — {{ v.ca.CA2.thanh_tien|floatformat:0|default:0 }}đ</td>
-  <td class="text">{{ v.ca.CA3.so_luong|default:0 }} cái — {{ v.ca.CA3.thanh_tien|floatformat:0|default:0 }}đ</td>
-  <td>{{ v.thanh_tien|floatformat:0 }}đ</td>
-</tr>
-{% endfor %}
-</tbody>
-</table>
+<!-- ===================== Daily / shift table ===================== -->
+<div class="kt-section">
+  <div class="kt-section-head">
+    <h2>Chi tiết theo ngày và ca</h2>
+    <span class="kt-section-note" id="kt-visible-count"></span>
+  </div>
+
+  <div class="kt-toolbar">
+    <div class="kt-seg" data-ca-filter role="group" aria-label="Lọc theo ca">
+      <button type="button" class="active" data-ca="all">Tất cả ca</button>
+      <button type="button" data-ca="CA1">Ca 1</button>
+      <button type="button" data-ca="CA2">Ca 2</button>
+      <button type="button" data-ca="CA3">Ca 3</button>
+    </div>
+    <div class="kt-seg" data-view-mode role="group" aria-label="Hiển thị">
+      <button type="button" data-view="both" class="active">Cả hai</button>
+      <button type="button" data-view="qty">Sản lượng</button>
+      <button type="button" data-view="amt">Tiền lương</button>
+    </div>
+    <div class="kt-search">
+      {% include "icons/search.svg" %}
+      <input type="text" placeholder="Tìm ngày (vd: 15 hoặc 15/08)" data-day-search aria-label="Tìm ngày">
+    </div>
+    <div class="kt-toolbar-spacer"></div>
+    <label class="note" for="kt-page-size">Số dòng/trang</label>
+    <select id="kt-page-size" data-page-size>
+      <option value="10">10</option>
+      <option value="15" selected>15</option>
+      <option value="31">Tất cả</option>
+    </select>
+  </div>
+
+  <div class="kt-scroll-hint" id="kt-scroll-hint">{% include "icons/sort.svg" %} Cuộn ngang để xem thêm cột →</div>
+
+  <div class="kt-day-table-wrap" id="kt-day-table-wrap">
+    <table class="kt-day-table" id="kt-day-table">
+      <thead>
+        <tr>
+          <th class="text" data-sort="date"><span class="th-inner">Ngày {% include "icons/sort.svg" %}</span></th>
+          <th class="col-CA1">Ca 1<br><span style="font-weight:400;text-transform:none;font-size:10px">05:00–13:00</span></th>
+          <th class="col-CA2">Ca 2<br><span style="font-weight:400;text-transform:none;font-size:10px">13:00–21:00</span></th>
+          <th class="col-CA3">Ca 3<br><span style="font-weight:400;text-transform:none;font-size:10px">21:00–05:00</span></th>
+          <th data-sort="qty"><span class="th-inner">Tổng SL {% include "icons/sort.svg" %}</span></th>
+          <th data-sort="amt"><span class="th-inner">Tổng tiền {% include "icons/sort.svg" %}</span></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in daily_rows %}
+        <tr class="{% if row.is_today %}is-today{% endif %} {% if row.is_zero %}is-zero{% endif %}"
+            data-search="{{ row.ngay|date:'d/m/Y' }} {{ row.ngay|date:'d' }}"
+            data-date="{{ row.ngay|date:'Ymd' }}" data-qty="{{ row.so_luong }}" data-amt="{{ row.thanh_tien }}">
+          <td class="text">
+            <span class="kt-date-badge">{{ row.ngay|date:"d/m/Y" }}</span>
+            <span class="kt-weekday">{{ row.ngay|date:"D" }}</span>
+          </td>
+          {% for ma_ca in "CA1,CA2,CA3"|split:"," %}
+          <td class="col-{{ ma_ca }}">
+            <div class="kt-cell">
+              <div class="kt-qty-line kt-cell-main">{{ row.ca|dict_get:ma_ca|dict_get:"so_luong"|vn_number }}<span class="kt-cell-unit">sp</span></div>
+              <div class="kt-amt-line kt-cell-sub">{{ row.ca|dict_get:ma_ca|dict_get:"thanh_tien"|vn_currency }}</div>
+            </div>
+          </td>
+          {% endfor %}
+          <td><span class="kt-cell-main">{{ row.so_luong|vn_number }}</span></td>
+          <td><span class="kt-cell-main">{{ row.thanh_tien|vn_currency }}</span></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+      <tfoot>
+        <tr>
+          <td class="text">Tổng toàn kỳ</td>
+          <td class="col-CA1"><div class="kt-qty-line">{{ daily_totals.ca1.so_luong|vn_number }}</div><div class="kt-amt-line kt-cell-sub">{{ daily_totals.ca1.thanh_tien|vn_currency }}</div></td>
+          <td class="col-CA2"><div class="kt-qty-line">{{ daily_totals.ca2.so_luong|vn_number }}</div><div class="kt-amt-line kt-cell-sub">{{ daily_totals.ca2.thanh_tien|vn_currency }}</div></td>
+          <td class="col-CA3"><div class="kt-qty-line">{{ daily_totals.ca3.so_luong|vn_number }}</div><div class="kt-amt-line kt-cell-sub">{{ daily_totals.ca3.thanh_tien|vn_currency }}</div></td>
+          <td>{{ daily_totals.so_luong|vn_number }}</td>
+          <td>{{ daily_totals.thanh_tien|vn_currency }}</td>
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+
+  <!-- Mobile: day cards -->
+  <div class="kt-daycards" id="kt-daycards">
+    {% for row in daily_rows %}
+    <details class="kt-daycard" data-search="{{ row.ngay|date:'d/m/Y' }} {{ row.ngay|date:'d' }}" data-date="{{ row.ngay|date:'Ymd' }}" data-qty="{{ row.so_luong }}" data-amt="{{ row.thanh_tien }}">
+      <summary>
+        <span><span class="kt-date-badge {% if row.is_today %}kt-today{% endif %}">{{ row.ngay|date:"d/m/Y" }}</span> <span class="kt-weekday">{{ row.ngay|date:"D" }}</span></span>
+        <span class="kt-daycard-total"><span class="amt">{{ row.thanh_tien|vn_currency }}</span><br><span class="qty">{{ row.so_luong|vn_number }} sản phẩm</span></span>
+      </summary>
+      <div class="kt-daycard-body">
+        {% for ma_ca in "CA1,CA2,CA3"|split:"," %}
+        <div class="kt-daycard-row col-{{ ma_ca }}">
+          <span>Ca {{ forloop.counter }}</span>
+          <span>{{ row.ca|dict_get:ma_ca|dict_get:"so_luong"|vn_number }} sp — {{ row.ca|dict_get:ma_ca|dict_get:"thanh_tien"|vn_currency }}</span>
+        </div>
+        {% endfor %}
+      </div>
+    </details>
+    {% empty %}
+    <div class="kt-empty-msg">Không có dữ liệu.</div>
+    {% endfor %}
+  </div>
+
+  <div class="kt-pager">
+    <span id="kt-pager-info"></span>
+    <div class="kt-pager-btns">
+      <button type="button" data-page-prev>{% include "icons/chevrons-left.svg" %}</button>
+      <span id="kt-pager-current">1</span>
+      <button type="button" data-page-next style="transform:scaleX(-1)">{% include "icons/chevrons-left.svg" %}</button>
+    </div>
+  </div>
 </div>
+
+<!-- ===================== Employee earnings ===================== -->
+{% if shares.per_employee %}
+<div class="kt-section">
+  <div class="kt-section-head">
+    <h2>Lương từng nhân viên</h2>
+    <span class="kt-section-note">Theo Hệ số ca — VB1054 mục 1.3 · Đơn giá bình quân {{ shares.don_gia_binh_quan|vn_currency }} / hệ số ca</span>
+  </div>
+  {% if shares.he_so_chua_gan %}
+  <div class="warn">Có {{ shares.he_so_chua_gan }} hệ số ca trong Bảng phân ca chưa khớp được với nhân viên nào (tên trên bảng chấm công không khớp danh sách nhân viên) — vẫn tính vào tổng hệ số toàn đơn vị nhưng không có ai nhận phần này.</div>
+  {% endif %}
+  <div class="table-wrap">
+  <table>
+    <thead><tr><th class="text">Nhân viên</th><th>Tổng hệ số ca</th><th>Hệ số chất lượng</th><th>Tiền lương</th></tr></thead>
+    <tbody>
+    {% for row in shares.per_employee %}
+    <tr>
+      <td class="text">{{ row.ten }}</td>
+      <td>{{ row.tong_he_so|vn_number:2 }}</td>
+      <td>{{ row.he_so_chat_luong|vn_number:2 }}</td>
+      <td>{{ row.tien_luong|vn_currency }}</td>
+    </tr>
+    {% endfor %}
+    </tbody>
+    <tfoot>
+      <tr class="total"><td class="text" colspan="3">Tổng lương đã chia cho {{ shares.per_employee|length }} nhân viên</td><td>{{ tong_luong_da_chia|vn_currency }}</td></tr>
+    </tfoot>
+  </table>
+  </div>
+</div>
+{% endif %}
 
 {% endif %}
+
+<script>
+(function () {
+  var tableWrap = document.getElementById("kt-day-table-wrap");
+  var table = document.getElementById("kt-day-table");
+  if (!table) return;
+  var tbody = table.querySelector("tbody");
+  var allRows = Array.prototype.slice.call(tbody.querySelectorAll("tr"));
+  var cardsWrap = document.getElementById("kt-daycards");
+  var allCards = cardsWrap ? Array.prototype.slice.call(cardsWrap.querySelectorAll(".kt-daycard")) : [];
+
+  var state = { ca: "all", view: "both", search: "", sortKey: "date", sortDir: 1, page: 1, pageSize: 15 };
+
+  function rowMatches(el) {
+    if (!state.search) return true;
+    var hay = (el.getAttribute("data-search") || "").toLowerCase();
+    return hay.indexOf(state.search.toLowerCase()) !== -1;
+  }
+
+  function applyCaFilter() {
+    table.classList.remove("hide-ca1", "hide-ca2", "hide-ca3");
+    if (state.ca !== "all") {
+      ["CA1", "CA2", "CA3"].forEach(function (ca) {
+        if (ca !== state.ca) table.classList.add("hide-" + ca.toLowerCase());
+      });
+    }
+  }
+
+  function applyViewMode() {
+    var cells = table.querySelectorAll(".kt-cell");
+    cells.forEach(function (c) {
+      c.classList.toggle("hide-qty", state.view === "amt");
+      c.classList.toggle("hide-amt", state.view === "qty");
+    });
+  }
+
+  function sortRows(rows) {
+    var key = state.sortKey === "date" ? "data-date" : (state.sortKey === "qty" ? "data-qty" : "data-amt");
+    return rows.slice().sort(function (a, b) {
+      var av = parseFloat(a.getAttribute(key)) || 0, bv = parseFloat(b.getAttribute(key)) || 0;
+      return (av - bv) * state.sortDir;
+    });
+  }
+
+  function render() {
+    applyCaFilter();
+    applyViewMode();
+
+    var filtered = allRows.filter(rowMatches);
+    var sorted = sortRows(filtered);
+    var pageSize = state.pageSize;
+    var totalPages = Math.max(1, Math.ceil(sorted.length / pageSize));
+    if (state.page > totalPages) state.page = totalPages;
+    var start = (state.page - 1) * pageSize;
+    var visible = sorted.slice(start, start + pageSize);
+
+    allRows.forEach(function (r) { r.style.display = "none"; });
+    visible.forEach(function (r) { r.style.display = ""; });
+    // giu dung thu tu da sap xep trong DOM
+    visible.forEach(function (r) { tbody.appendChild(r); });
+
+    var filteredCards = allCards.filter(rowMatches);
+    allCards.forEach(function (c) { c.style.display = filteredCards.indexOf(c) === -1 ? "none" : ""; });
+
+    document.getElementById("kt-visible-count").textContent = filtered.length + " / " + allRows.length + " ngày";
+    document.getElementById("kt-pager-info").textContent = "Trang " + state.page + " / " + totalPages + " (" + filtered.length + " ngày)";
+    document.getElementById("kt-pager-current").textContent = state.page;
+    document.querySelector("[data-page-prev]").disabled = state.page <= 1;
+    document.querySelector("[data-page-next]").disabled = state.page >= totalPages;
+
+    if (tableWrap) {
+      var scrollable = tableWrap.scrollWidth > tableWrap.clientWidth + 4;
+      document.getElementById("kt-scroll-hint").classList.toggle("is-scrollable", scrollable);
+    }
+  }
+
+  document.querySelectorAll("[data-ca-filter] button").forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      document.querySelectorAll("[data-ca-filter] button").forEach(function (b) { b.classList.remove("active"); });
+      btn.classList.add("active");
+      state.ca = btn.getAttribute("data-ca");
+      state.page = 1;
+      render();
+    });
+  });
+
+  document.querySelectorAll("[data-view-mode] button").forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      document.querySelectorAll("[data-view-mode] button").forEach(function (b) { b.classList.remove("active"); });
+      btn.classList.add("active");
+      state.view = btn.getAttribute("data-view");
+      render();
+    });
+  });
+
+  var searchInput = document.querySelector("[data-day-search]");
+  if (searchInput) {
+    searchInput.addEventListener("input", function () {
+      state.search = searchInput.value.trim();
+      state.page = 1;
+      render();
+    });
+  }
+
+  var pageSizeSelect = document.querySelector("[data-page-size]");
+  if (pageSizeSelect) {
+    pageSizeSelect.addEventListener("change", function () {
+      state.pageSize = parseInt(pageSizeSelect.value, 10) || 15;
+      state.page = 1;
+      render();
+    });
+  }
+
+  table.querySelectorAll("th[data-sort]").forEach(function (th) {
+    th.addEventListener("click", function () {
+      var key = th.getAttribute("data-sort");
+      if (state.sortKey === key) { state.sortDir *= -1; } else { state.sortKey = key; state.sortDir = 1; }
+      render();
+    });
+  });
+
+  document.querySelector("[data-page-prev]").addEventListener("click", function () { state.page -= 1; render(); });
+  document.querySelector("[data-page-next]").addEventListener("click", function () { state.page += 1; render(); });
+
+  render();
+})();
+
+function ktGoToPeriod(select) {
+  var val = select.value;
+  if (!val || val.indexOf("-") === -1) return;
+  var parts = val.split("-");
+  window.location.href = "/khai-thac/" + parts[0] + "/" + parseInt(parts[1], 10) + "/";
+}
+</script>
 {% endblock %}
