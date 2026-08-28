@@ -6,6 +6,7 @@ from django.shortcuts import render
 
 from core.models import PostOffice
 from core.permissions import get_profile, scope_queryset
+from khaithac.services.employee_pay import compute_employee_shares
 from khaithac.services.pricing import compute_fund_breakdown
 
 
@@ -25,14 +26,17 @@ def dashboard(request, year=None, month=None):
     post_office = office_choices.first()
 
     result = None
+    shares = None
     if post_office:
         result = compute_fund_breakdown(post_office, year, month)
+        shares = compute_employee_shares(post_office, year, month, result["tong_quy_tien_luong"])
 
     context = {
         "year": year,
         "month": month,
         "post_office": post_office,
         "result": result,
+        "shares": shares,
     }
     return render(request, "khaithac_dashboard.html", context)
 

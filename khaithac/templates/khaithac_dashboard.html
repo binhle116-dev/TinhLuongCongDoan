@@ -10,12 +10,6 @@
 <code>python manage.py import_khaithac_production --tu {{ year }}-{{ month|stringformat:"02d" }}-01 --den ...</code>.</div>
 {% else %}
 
-<div class="warn">
-  Đây là <b>Quỹ tiền lương thực hiện của đơn vị</b> (Sản lượng × Đơn giá theo VB1054/1182), theo đúng công thức
-  mục II.1 VB1054/TB-BĐHUE. Việc chia số tiền này cho từng nhân viên theo Hệ số ca làm việc (mục 1.3) cần Bảng
-  phân ca thực tế — <b>chưa có dữ liệu này</b>, nên trang này mới dừng ở mức tổng quỹ của bưu cục {{ post_office }}.
-</div>
-
 {% if result.unmapped_loai %}
 <div class="warn">
   Có sản lượng <b>chưa được tính vào quỹ tiền lương</b> vì Loại chưa được ánh xạ vào Nhóm dịch vụ:
@@ -29,6 +23,35 @@
   <div class="stat-tile"><div class="label">Sản lượng tính tiền</div><div class="value">{{ result.tong_san_luong_tinh_tien|floatformat:0 }}</div></div>
   <div class="stat-tile"><div class="label">Bưu cục</div><div class="value">{{ post_office.code }}</div></div>
 </div>
+
+<h2>Lương từng nhân viên (theo Hệ số ca — VB1054 mục 1.3)</h2>
+{% if not shares.per_employee %}
+<div class="warn">Chưa có Bảng phân ca (KhaiThacShiftAssignment) cho tháng {{ month }}/{{ year }} — chạy
+<code>python manage.py import_khaithac_shift_roster --thang {{ year }}-{{ month|stringformat:"02d" }}</code>.</div>
+{% else %}
+<div class="stat-grid">
+  <div class="stat-tile"><div class="label">Đơn giá bình quân / hệ số ca</div><div class="value">{{ shares.don_gia_binh_quan|floatformat:0 }}đ</div></div>
+  <div class="stat-tile"><div class="label">Tổng hệ số ca toàn đơn vị</div><div class="value">{{ shares.tong_he_so_toan_don_vi }}</div></div>
+</div>
+{% if shares.he_so_chua_gan %}
+<div class="warn">Có {{ shares.he_so_chua_gan }} hệ số ca trong Bảng phân ca chưa khớp được với nhân viên nào (tên trên bảng chấm công không khớp danh sách nhân viên) — vẫn tính vào tổng hệ số toàn đơn vị nhưng KHÔNG có ai nhận phần này.</div>
+{% endif %}
+<div class="table-wrap">
+<table>
+<thead><tr><th class="text">Nhân viên</th><th>Tổng hệ số ca</th><th>Hệ số chất lượng</th><th>Tiền lương</th></tr></thead>
+<tbody>
+{% for row in shares.per_employee %}
+<tr>
+  <td class="text">{{ row.ten }}</td>
+  <td>{{ row.tong_he_so }}</td>
+  <td>{{ row.he_so_chat_luong }}</td>
+  <td>{{ row.tien_luong|floatformat:0 }}đ</td>
+</tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
+{% endif %}
 
 <h2>Theo Nhóm dịch vụ (cả tháng)</h2>
 <div class="table-wrap">

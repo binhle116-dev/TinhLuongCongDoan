@@ -17,9 +17,9 @@ session, second only to `README_AI.md`.
 
 | Field | Value |
 | --- | --- |
-| Current Phase | `Module Phát — Milestone 1 (MVP) COMPLETED. Module Khai thác — MVP (quỹ tiền lương theo ca/ngày ở mức đơn vị) COMPLETED; per-employee split NOT YET done (needs shift roster). See Section 4.` |
+| Current Phase | `Module Phát — Milestone 1 (MVP) COMPLETED. Module Khai thác — MVP + per-employee split COMPLETED (DEC-016, DEC-017). Only open item: KT1 (M-prefix) Nhóm dịch vụ confirmation. See Section 4.` |
 | Current Ticket | `None — AWAITING PO DIRECTION` |
-| Next Ticket | `Not yet chosen by the Product Owner. Candidates: (a) obtain the real Khai thác shift roster (bảng phân ca) so KhaiThacShiftAssignment can be populated and per-employee pay computed (DEC-016); (b) get PO/TCHC confirmation on which Nhóm dịch vụ 'KT1' (M-prefix) belongs to; (c) resolve the remaining 56 unmatched postman codes / 44 employees without postman_code (Phát); (d) formal PO UI Acceptance pass on both modules; (e) start module Thu Gom or Vận chuyển. See Section 4.` |
+| Next Ticket | `Not yet chosen by the Product Owner. Candidates: (a) get PO/TCHC confirmation on which Nhóm dịch vụ 'KT1' (M-prefix) belongs to, or whether it needs its own price (DEC-016); (b) supply "Phụ lục 01" (Khai thác monthly quality-coefficient table) so KhaiThacQualityCoefficient isn't defaulted to 1.0 for everyone; (c) resolve the remaining 56 unmatched postman codes / 44 employees without postman_code (Phát); (d) formal PO UI Acceptance pass on both modules; (e) start module Thu Gom or Vận chuyển. See Section 4.` |
 | Last PO Status | `Product Owner has used Milestone 1 directly (logged into /admin/, explored roles) and raised no FAIL. No formal PO PASS has been recorded under PO_UI_ACCEPTANCE_WORKFLOW.md yet, since that document did not exist until this ticket.` |
 | Current Branch | `Not yet a Git repository — see Repository Status below.` |
 | Current Manifest | `None — no ticket-specific manifest exists yet under docs/10_TICKETS/.` |
@@ -37,7 +37,7 @@ session, second only to `README_AI.md`.
 | Last Closed Manifest | `None — Milestone 1 was executed before this manifest-driven governance model existed; its design record lives in the Claude Code plan history for this project, not in docs/10_TICKETS/.` |
 | Repository Status | `Git init + first commit + remote (https://github.com/binhle116-dev/TinhLuongCongDoan.git) authorized by Product Owner (DEC-007), being executed in this ticket. See Continuation Notes for the exact push confirmation step.` |
 | Governance Version | `V1 (this document set) — first created 2026-08-27, adapted from a prior project's multi-agent standard into a single-executor (Claude Code only) model. See PROJECT_DECISIONS.md DEC-001 through DEC-005.` |
-| Khai thác Module Status | `MVP shipped 2026-08-28 (DEC-016): new app khaithac, direct SQL Server import (BCCP530100_2024 + BCCP530900) replacing the Excel/SFTP pattern used by Phát. Quỹ tiền lương computed per VB1054+VB1182 (4 Nhóm dịch vụ, date-versioned pricing). KT1 (M-prefix) deliberately unmapped pending PO/TCHC confirmation. Per-employee split blocked on a real shift roster - not guessed.` |
+| Khai thác Module Status | `MVP + per-employee split shipped 2026-08-28 (DEC-016, DEC-017): new app khaithac, direct SQL Server import (BCCP530100_2024 + BCCP530900) replacing the Excel/SFTP pattern used by Phát. Quỹ tiền lương computed per VB1054+VB1182 (4 Nhóm dịch vụ, date-versioned pricing). KT1 (M-prefix) deliberately unmapped pending PO/TCHC confirmation. Per-employee split now implemented from the real shift roster ("BCC hệ số 2026 (LT).xlsx") per VB1054 §1.3 - July 2026 verified end-to-end (302.6 total hệ số matches the source file's own TỔNG cell; 17 employees paid, summing exactly to the fund). Hệ số chất lượng still defaults to 1.0 for everyone pending "Phụ lục 01".` |
 | Last Updated | `2026-08-28` |
 
 ## 3. Usage Rules

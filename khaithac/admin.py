@@ -38,8 +38,9 @@ class KhaiThacRawProductionAdmin(admin.ModelAdmin):
 
 @admin.register(KhaiThacShiftAssignment)
 class KhaiThacShiftAssignmentAdmin(admin.ModelAdmin):
-    list_display = ["employee", "work_date", "ca", "is_truong_ca", "actual_hours"]
-    list_filter = ["ca", "is_truong_ca"]
+    list_display = ["raw_name", "employee", "work_date", "cong_viec", "ca", "he_so"]
+    list_filter = ["ca", "cong_viec"]
+    search_fields = ["raw_name"]
     date_hierarchy = "work_date"
 
 

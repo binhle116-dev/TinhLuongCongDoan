@@ -128,36 +128,37 @@ class KhaiThacPriceCard(models.Model):
 
 
 # ---------------------------------------------------------------------------
-# 3) Phan ca thuc te + he so chat luong - CAN du lieu bang cham cong/phan ca
-#    thuc te tu don vi (chua co tai thoi diem tao model nay). De trong,
-#    khong doan, giong nguyen tac DEC-005/DEC-009 cua module Phat.
+# 3) Phan ca thuc te + he so chat luong - nhap tu bang cham cong that cua don
+#    vi ("BCC he so <nam> (LT).xlsx", 1 sheet/thang). He so da duoc don vi
+#    tinh san tren tung dong (khong tu tinh lai trong code) vi thuc te co
+#    truong hop khong tron 1.0/1.2 (vd cong viec "GSS" = 0.4) - giu nguyen
+#    dung nhu ho ghi, tranh doan sai quy tac quy doi that.
 # ---------------------------------------------------------------------------
 
 class KhaiThacShiftAssignment(TimeStampedModel):
-    """1 dong = 1 nhan vien lam 1 ca trong 1 ngay tai buu cuc Khai thac.
-    He so ca theo VB1054 muc 1.3: ca chuan (8h) = 1.0, truong ca = 1.2,
-    khong du 1 ca thi quy doi theo (so gio thuc te / 8) x he so tuong ung."""
+    """1 dong = 1 nguoi lam 1 cong viec trong 1 ngay tai buu cuc Khai thac,
+    theo dung 1 dong trong bang cham cong that. employee = NULL neu ten tren
+    bang cham cong (raw_name) khong khop duoc voi nhan vien nao trong he
+    thong (vd nhan su tam thoi/nhan vien quan ly dung ten chung "Lanh dao
+    TTVH") - van luu lai de khong lam sai tong he so ca toan don vi, va de
+    bao cao rieng (xem /khai-thac/chua-anh-xa/)."""
 
-    employee = models.ForeignKey(Employee, on_delete=models.CASCADE, related_name="khaithac_shifts")
-    work_date = models.DateField("Ngay lam")
-    ca = models.CharField("Ca", max_length=5, choices=CA_CHOICES)
-    is_truong_ca = models.BooleanField("Truong ca (duoc giao nhiem vu)", default=False)
-    actual_hours = models.DecimalField(
-        "So gio lam thuc te", max_digits=4, decimal_places=1, default=Decimal("8.0")
+    employee = models.ForeignKey(
+        Employee, null=True, blank=True, on_delete=models.SET_NULL, related_name="khaithac_shifts"
     )
+    raw_name = models.CharField("Ten tren bang cham cong", max_length=255)
+    work_date = models.DateField("Ngay lam")
+    cong_viec = models.CharField("Cong viec (TRUONG CA/KTV/GSS...)", max_length=30)
+    ca = models.CharField("Ca", max_length=5, choices=CA_CHOICES, blank=True)
+    he_so = models.DecimalField("He so (theo bang cham cong)", max_digits=5, decimal_places=2)
 
     class Meta:
         verbose_name = "Phan ca Khai thac"
         verbose_name_plural = "Bang phan ca Khai thac"
-        unique_together = [("employee", "work_date", "ca")]
         ordering = ["-work_date", "ca"]
 
     def __str__(self):
-        return f"{self.employee} - {self.work_date} {self.ca}"
-
-    def he_so_ca(self) -> Decimal:
-        he_so_chuan = Decimal("1.2") if self.is_truong_ca else Decimal("1.0")
-        return (Decimal(self.actual_hours) / Decimal("8")) * he_so_chuan
+        return f"{self.raw_name} - {self.work_date} {self.cong_viec} ({self.he_so})"
 
 
 class KhaiThacQualityCoefficient(models.Model):

@@ -139,16 +139,22 @@ the boi 1 van ban dieu chinh moi, hoac them Nhom dich vu moi):
 python manage.py seed_khaithac_pricing
 ```
 
-Xem ket qua tai `/khai-thac/` (Quy tien luong theo ca/ngay/thang) va
-`/khai-thac/chua-anh-xa/` (Loai chua duoc xac dinh Nhom dich vu - hien tai
-la `KT1`, can PO/TCHC xac nhan).
+**Import Bang phan ca thuc te** (file "BCC he so <nam> (LT).xlsx", 1
+sheet/thang vd `T7.26`), can de chia Quy tien luong cho tung nhan vien
+theo He so ca (VB1054 muc 1.3):
 
-**QUAN TRONG - chua lam xong**: cong thuc chia Quy tien luong cho tung
-nhan vien theo He so ca lam viec (VB1054 muc 1.3) CAN mot Bang phan ca
-thuc te (ai truc Ca nao, ngay nao, co la Truong ca khong) ma hien **CHUA
-CO du lieu nay** - khong duoc doan. Model `KhaiThacShiftAssignment` va
-`KhaiThacQualityCoefficient` da tao san, sua qua `/admin/` khi co du lieu
-that.
+```bash
+python manage.py import_khaithac_shift_roster --thang 2026-07
+```
+
+Xem ket qua tai `/khai-thac/` (Quy tien luong + luong tung nhan vien theo
+ca/ngay/thang) va `/khai-thac/chua-anh-xa/` (Loai chua duoc xac dinh Nhom
+dich vu - hien tai la `KT1`, can PO/TCHC xac nhan).
+
+**QUAN TRONG - chua lam xong**: He so chat luong thang
+(`KhaiThacQualityCoefficient`, VB1054 muc 1.4, Phu luc 01) hien mac dinh
+1.0 (Dat) cho moi nguoi vi CHUA CO noi dung Phu luc 01 that - sua qua
+`/admin/` khi PO cung cap.
 
 ## Cau truc du an
 
@@ -174,6 +180,7 @@ TinhLuongCongDoan/
     management/commands/
       import_khaithac_production.py
       seed_khaithac_pricing.py
+      import_khaithac_shift_roster.py
     views.py, urls.py, admin.py, templates/
   serve.py             - chay production bang waitress
   run_app.bat          - bam dup de chay thu tren Windows
@@ -186,7 +193,9 @@ TinhLuongCongDoan/
 python manage.py test
 ```
 
-10 test module Phat (co che phan quyen theo buu cuc, import file mau) + 3
+10 test module Phat (co che phan quyen theo buu cuc, import file mau) + 6
 test module Khai thac (`compute_fund_breakdown`: don gia dung theo thoi
 diem hieu luc, Loai chua anh xa bi loai khoi tong, gop dung nhieu muc can
-vao 1 Loai).
+vao 1 Loai; `compute_employee_shares`: chia dung theo He so ca, ap dung
+He so chat luong, dong chua khop ten van tinh vao tong nhung khong co
+nguoi nhan).
