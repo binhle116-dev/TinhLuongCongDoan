@@ -1,0 +1,85 @@
+{% extends "admin/base_site.html" %}
+
+{% block extrastyle %}
+{{ block.super }}
+<style>
+/* Doi mau chu de Django Admin cho khop voi giao dien chinh (base.html) -
+   chi ghi de bien CSS (--...) cua Django, khong dong vao HTML/JS cua
+   admin nen khong anh huong chuc nang (list_filter, autocomplete...). */
+:root,
+html[data-theme="light"] {
+  --primary: #182634;
+  --secondary: #24384a;
+  --accent: #2f7de1;
+  --primary-fg: #fff;
+
+  --header-color: #ffffff;
+  --header-branding-color: #ffffff;
+  --header-bg: var(--primary);
+  --header-link-color: #ffffff;
+
+  --breadcrumbs-fg: #a9b8c7;
+  --breadcrumbs-bg: var(--primary);
+
+  --link-fg: #2f7de1;
+  --link-hover-color: #2360b3;
+  --link-selected-fg: #2360b3;
+
+  --button-bg: #2f7de1;
+  --button-hover-bg: #2360b3;
+  --default-button-bg: #2360b3;
+  --default-button-hover-bg: #2f7de1;
+
+  --object-tools-bg: #2f7de1;
+  --object-tools-hover-bg: #2360b3;
+
+  --body-bg: #eef1f5;
+  --darkened-bg: #f5f7fa;
+  --border-color: #dde3ea;
+  --hairline-color: #e8ecf1;
+
+  --font-family-primary: "Segoe UI", -apple-system, BlinkMacSystemFont, Arial, sans-serif;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root { --primary: #101923; --secondary: #182634; --header-bg: var(--primary); --breadcrumbs-bg: var(--primary); }
+}
+html[data-theme="dark"] {
+  --primary: #101923;
+  --secondary: #182634;
+  --header-bg: var(--primary);
+  --breadcrumbs-bg: var(--primary);
+  --link-fg: #6fa8f5;
+  --link-hover-color: #a9c9f7;
+}
+
+#header { padding: 12px 24px; }
+#branding h1, #site-name a { font-weight: 600; }
+
+.module {
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0,0,0,.08);
+}
+.module h2, .module caption, .inline-group h2 {
+  border-radius: 0;
+  font-size: 12.5px;
+  letter-spacing: .04em;
+}
+
+#content-related .module { border-radius: 10px; box-shadow: 0 1px 3px rgba(0,0,0,.08); }
+
+.button, input[type="submit"], input[type="button"], .submit-row input, a.button {
+  border-radius: 6px;
+}
+
+div.breadcrumbs { font-size: 12.5px; }
+</style>
+{% endblock %}
+
+{% block branding %}
+{{ block.super }}
+<div style="margin-top:4px;">
+  <a href="{% url 'dashboard' %}" style="color:#a9b8c7;font-size:12.5px;text-decoration:none;">&larr; Ve trang chu</a>
+</div>
+{% endblock %}
