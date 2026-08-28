@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block title %}Tổng quan{% endblock %}
+{% block page_title %}Tổng quan — Lương theo công đoạn{% endblock %}
+{% block content %}
+
+<form method="get" class="filter-bar">
+  <label>Năm</label><input type="number" name="year" value="{{ year }}" style="width:90px">
+  <label>Tháng</label><input type="number" name="month" value="{{ month }}" style="width:70px">
+  {% if office_choices|length > 1 %}
+  <label>Bưu cục</label>
+  <select name="bc">
+    <option value="">Tất cả bưu cục</option>
+    {% for o in office_choices %}
+      <option value="{{ o.code }}" {% if o.code == selected_office %}selected{% endif %}>{{ o.code }} - {{ o.name }}</option>
+    {% endfor %}
+  </select>
+  {% endif %}
+  <button class="btn secondary" type="submit">Xem</button>
+</form>
+
+<h2>Công đoạn Phát</h2>
+{% if not phat.run %}
+<div class="warn">Chưa có dữ liệu tính lương cho tháng này.</div>
+{% else %}
+<div class="warn">TẠM TÍNH — CHƯA XÁC MINH. Số liệu cập nhật đến lần import gần nhất, chưa phải lương chính thức.</div>
+{% endif %}
+<div class="stat-grid">
+  <div class="stat-tile"><div class="label">Số lao động có dữ liệu</div><div class="value">{{ phat.totals.so_lao_dong|default:0 }}</div></div>
+  <div class="stat-tile"><div class="label">Công theo sản lượng</div><div class="value">{{ phat.totals.piece_rate|default:0|floatformat:0 }}</div></div>
+  <div class="stat-tile"><div class="label">Tổng hỗ trợ</div><div class="value">{{ phat.totals.allowance|default:0|floatformat:0 }}</div></div>
+  <div class="stat-tile"><div class="label">Tổng thu nhập</div><div class="value">{{ phat.totals.total|default:0|floatformat:0 }}</div></div>
+</div>
+<p><a class="btn" href="{% url 'payroll_detail' year month %}{% if selected_office %}?bc={{ selected_office }}{% endif %}">Xem chi tiết Lương Phát</a></p>
+
+<h2>Công đoạn Khai thác</h2>
+{% if khaithac %}
+<div class="stat-grid">
+  <div class="stat-tile"><div class="label">Bưu cục</div><div class="value">{{ khaithac.post_office.code }}</div></div>
+  <div class="stat-tile"><div class="label">Số lao động có lương</div><div class="value">{{ khaithac.so_lao_dong }}</div></div>
+  <div class="stat-tile"><div class="label">Sản lượng tính tiền</div><div class="value">{{ khaithac.san_luong }}</div></div>
+  <div class="stat-tile"><div class="label">Quỹ tiền lương</div><div class="value">{{ khaithac.quy_tien_luong|floatformat:0 }}đ</div></div>
+</div>
+<p><a class="btn" href="{% url 'khaithac_dashboard_month' year month %}">Xem chi tiết Khai thác</a></p>
+{% else %}
+<div class="note">Không có dữ liệu Khai thác cho lựa chọn hiện tại (khác bưu cục Khai thác, hoặc ngoài phạm vi tài khoản của bạn).</div>
+{% endif %}
+
+<h2>Công đoạn khác</h2>
+<div class="note">Thu Gom, Vận chuyển: sắp có.</div>
+
+{% if phat.last_batch %}
+<div class="card">
+  <h2 style="margin-top:0">Lần import gần nhất (Phát)</h2>
+  <p class="note">
+    File: <b>{{ phat.last_batch.source_filename }}</b> — Ngày dữ liệu: {{ phat.last_batch.production_date }} —
+    {{ phat.last_batch.row_count }} dòng, {{ phat.last_batch.unmatched_count }} dòng chưa ánh xạ được
+    ({{ phat.last_batch.created_at }})
+  </p>
+</div>
+{% endif %}
+{% endblock %}

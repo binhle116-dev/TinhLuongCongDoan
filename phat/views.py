@@ -9,13 +9,11 @@ from django.db.models import Count, Sum
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 
-from core.models import Employee, PostOffice
-from core.permissions import get_profile, scope_queryset, user_scope_post_office
-from phat.forms import AllowanceEntryForm, EmployeeForm
+from core.permissions import get_profile, scope_post_office_choices, scope_queryset
+from phat.forms import AllowanceEntryForm
 from phat.models import (
     AllowanceEntry,
     EmployeeMonthlyPay,
-    ImportBatch,
     MonthlyPayrollRun,
     RawDailyProduction,
 )
@@ -24,52 +22,6 @@ from phat.models import (
 def _current_year_month():
     today = dt.date.today()
     return today.year, today.month
-
-
-@login_required
-def dashboard(request):
-    year, month = _current_year_month()
-    run = MonthlyPayrollRun.objects.filter(year=year, month=month).first()
-    pays = EmployeeMonthlyPay.objects.filter(run=run) if run else EmployeeMonthlyPay.objects.none()
-    pays = scope_queryset(pays, request.user, field_name="employee__post_office")
-    totals = pays.aggregate(
-        piece_rate=Sum("piece_rate_amount"), allowance=Sum("allowance_amount"), total=Sum("total_amount")
-    )
-    last_batch = ImportBatch.objects.order_by("-created_at").first()
-    context = {
-        "year": year,
-        "month": month,
-        "run": run,
-        "totals": totals,
-        "employee_count": pays.count(),
-        "last_batch": last_batch,
-        "profile": get_profile(request.user),
-    }
-    return render(request, "dashboard.html", context)
-
-
-@login_required
-def employee_list(request):
-    employees = scope_queryset(Employee.objects.select_related("post_office"), request.user)
-    return render(request, "employee_list.html", {"employees": employees})
-
-
-@login_required
-def employee_edit(request, pk=None):
-    instance = None
-    if pk is not None:
-        instance = get_object_or_404(
-            scope_queryset(Employee.objects.all(), request.user), pk=pk
-        )
-    if request.method == "POST":
-        form = EmployeeForm(request.POST, instance=instance, user=request.user)
-        if form.is_valid():
-            form.save()
-            messages.success(request, "Da luu thong tin nhan vien.")
-            return redirect("employee_list")
-    else:
-        form = EmployeeForm(instance=instance, user=request.user)
-    return render(request, "employee_form.html", {"form": form, "instance": instance})
 
 
 @login_required
@@ -118,7 +70,7 @@ def payroll_detail(request, year, month):
     pays = scope_queryset(pays, request.user, field_name="employee__post_office")
 
     # Danh sach BCVH cho bo loc - chi trong pham vi nguoi dung duoc xem.
-    office_choices = scope_queryset(PostOffice.objects.all(), request.user).order_by("code")
+    office_choices = scope_post_office_choices(request.user).order_by("code")
     selected_office = request.GET.get("bc", "")
     if selected_office:
         pays = pays.filter(employee__post_office__code=selected_office)

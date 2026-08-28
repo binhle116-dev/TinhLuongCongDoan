@@ -7,7 +7,7 @@ from functools import wraps
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 
-from core.models import UserProfile
+from core.models import PostOffice, UserProfile
 
 
 def get_profile(user):
@@ -35,6 +35,17 @@ def scope_queryset(queryset, user, field_name="post_office"):
     if post_office is None:
         return queryset
     return queryset.filter(**{field_name: post_office})
+
+
+def scope_post_office_choices(user):
+    """Tra ve danh sach PostOffice user duoc chon (vd dropdown loc theo
+    BCVH). Khac scope_queryset() thong thuong: PostOffice khong co truong
+    tu tro ve chinh no ten 'post_office' de loc qua field_name mac dinh,
+    nen can loc rieng theo pk."""
+    post_office = user_scope_post_office(user)
+    if post_office is None:
+        return PostOffice.objects.all()
+    return PostOffice.objects.filter(pk=post_office.pk)
 
 
 def role_required(*roles):

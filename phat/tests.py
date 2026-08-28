@@ -12,41 +12,25 @@ from phat.services.importer import import_sanluong_chitiet
 SAMPLE_FILE = Path(settings.SANLUONG_PHAT_DIR) / "SanLuongChiTiet_26082026.xlsx"
 
 
-class EmployeeScopingViewTests(TestCase):
-    """Kiem tra o muc view (khong chi o muc queryset) - mo phong dung
-    tinh huong that: 2 Truong buu cuc dang nhap tu 2 tai khoan khac nhau."""
+class PayrollDetailViewTests(TestCase):
+    """Bao ve khoi loi that da tim thay: payroll_detail() tung crash cho
+    Truong buu cuc (khong phai Admin/superuser) vi office_choices dung
+    scope_queryset() sai field_name tren chinh queryset PostOffice."""
 
     def setUp(self):
         self.po_a = PostOffice.objects.create(code="A1", name="Buu cuc A")
-        self.po_b = PostOffice.objects.create(code="B1", name="Buu cuc B")
-        self.emp_a = Employee.objects.create(hrm_code="HRM_A", full_name="Nhan vien A", post_office=self.po_a)
-        self.emp_b = Employee.objects.create(hrm_code="HRM_B", full_name="Nhan vien B", post_office=self.po_b)
-
-        self.truong_a = User.objects.create_user("view_truong_a", password="x")
+        self.truong_a = User.objects.create_user("payroll_truong_a", password="x")
         UserProfile.objects.create(
             user=self.truong_a, role=UserProfile.ROLE_TRUONG_BUU_CUC, post_office=self.po_a
         )
         self.client = Client()
 
-    def test_employee_list_only_shows_own_post_office(self):
-        self.client.login(username="view_truong_a", password="x")
-        resp = self.client.get(reverse("employee_list"))
-        self.assertContains(resp, "Nhan vien A")
-        self.assertNotContains(resp, "Nhan vien B")
-
-    def test_cannot_edit_other_post_office_employee(self):
-        self.client.login(username="view_truong_a", password="x")
-        resp = self.client.get(reverse("employee_edit", args=[self.emp_b.pk]))
-        self.assertEqual(resp.status_code, 404)
-
-    def test_can_edit_own_post_office_employee(self):
-        self.client.login(username="view_truong_a", password="x")
-        resp = self.client.get(reverse("employee_edit", args=[self.emp_a.pk]))
+    def test_truong_buu_cuc_can_view_payroll_detail_without_crashing(self):
+        self.client.login(username="payroll_truong_a", password="x")
+        resp = self.client.get(reverse("payroll_detail", args=[2026, 1]))
         self.assertEqual(resp.status_code, 200)
-
-    def test_anonymous_redirected_to_login(self):
-        resp = self.client.get(reverse("employee_list"))
-        self.assertEqual(resp.status_code, 302)
+        # Chi thay dung 1 lua chon (buu cuc cua chinh minh), khong thay BC khac.
+        self.assertContains(resp, "A1")
 
 
 class ImportSanLuongChiTietTests(TestCase):

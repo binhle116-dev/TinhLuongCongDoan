@@ -1,8 +1,9 @@
 from django.contrib.auth.models import User
-from django.test import TestCase
+from django.test import Client, TestCase
+from django.urls import reverse
 
 from core.models import Employee, PostOffice, UserProfile
-from core.permissions import scope_queryset
+from core.permissions import scope_post_office_choices, scope_queryset
 
 
 class ScopeQuerysetTests(TestCase):
@@ -46,3 +47,62 @@ class ScopeQuerysetTests(TestCase):
         bare_user = User.objects.create_user("bare", password="x")
         qs = scope_queryset(Employee.objects.all(), bare_user)
         self.assertEqual(qs.count(), 2)
+
+    def test_scope_post_office_choices_for_truong_buu_cuc(self):
+        # Loi that da tim thay: scope_queryset(PostOffice.objects.all(), user)
+        # voi field_name mac dinh "post_office" crash vi PostOffice khong co
+        # truong do tro ve chinh no - can ham rieng loc theo pk.
+        qs = scope_post_office_choices(self.truong_a)
+        self.assertEqual(list(qs), [self.po_a])
+
+    def test_scope_post_office_choices_for_admin_sees_all(self):
+        qs = scope_post_office_choices(self.admin_user)
+        self.assertEqual(qs.count(), 2)
+
+
+class EmployeeScopingViewTests(TestCase):
+    """Kiem tra o muc view (khong chi o muc queryset) - mo phong dung
+    tinh huong that: 2 Truong buu cuc dang nhap tu 2 tai khoan khac nhau.
+    Nhan vien/Tong quan la module rieng (tach khoi Cong doan Phat), dung
+    chung cho moi cong doan."""
+
+    def setUp(self):
+        self.po_a = PostOffice.objects.create(code="VIEW_A1", name="Buu cuc A")
+        self.po_b = PostOffice.objects.create(code="VIEW_B1", name="Buu cuc B")
+        self.emp_a = Employee.objects.create(hrm_code="VIEW_HRM_A", full_name="Nhan vien A", post_office=self.po_a)
+        self.emp_b = Employee.objects.create(hrm_code="VIEW_HRM_B", full_name="Nhan vien B", post_office=self.po_b)
+
+        self.truong_view_a = User.objects.create_user("view_truong_a", password="x")
+        UserProfile.objects.create(
+            user=self.truong_view_a, role=UserProfile.ROLE_TRUONG_BUU_CUC, post_office=self.po_a
+        )
+        self.client = Client()
+
+    def test_employee_list_only_shows_own_post_office(self):
+        self.client.login(username="view_truong_a", password="x")
+        resp = self.client.get(reverse("employee_list"))
+        self.assertContains(resp, "Nhan vien A")
+        self.assertNotContains(resp, "Nhan vien B")
+
+    def test_cannot_edit_other_post_office_employee(self):
+        self.client.login(username="view_truong_a", password="x")
+        resp = self.client.get(reverse("employee_edit", args=[self.emp_b.pk]))
+        self.assertEqual(resp.status_code, 404)
+
+    def test_can_edit_own_post_office_employee(self):
+        self.client.login(username="view_truong_a", password="x")
+        resp = self.client.get(reverse("employee_edit", args=[self.emp_a.pk]))
+        self.assertEqual(resp.status_code, 200)
+
+    def test_anonymous_redirected_to_login(self):
+        resp = self.client.get(reverse("employee_list"))
+        self.assertEqual(resp.status_code, 302)
+
+    def test_dashboard_loads_for_truong_buu_cuc(self):
+        self.client.login(username="view_truong_a", password="x")
+        resp = self.client.get(reverse("dashboard"))
+        self.assertEqual(resp.status_code, 200)
+
+    def test_dashboard_loads_for_anonymous_redirects_to_login(self):
+        resp = self.client.get(reverse("dashboard"))
+        self.assertEqual(resp.status_code, 302)

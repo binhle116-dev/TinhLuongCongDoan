@@ -13,8 +13,11 @@ Xem chi tiet thiet ke tai `C:\Users\TTVH-LeThanhBinh\.claude\plans\ancient-leapi
 Da lam:
 - Dang nhap + 3 vai tro: Admin, Phong ban, Truong buu cuc (chi thay/sua
   du lieu buu cuc minh - da kiem thu tu dong + thu cong).
-- Quan ly Nhan vien/Buu cuc (Admin qua `/admin/`, Truong buu cuc qua
-  `/nhan-vien/`).
+- Quan ly Nhan vien/Buu cuc (Admin qua `/admin/`, moi vai tro qua
+  `/nhan-su/` - module rieng, dung chung cho moi cong doan, khong con
+  nam trong Cong doan Phat).
+- Trang Tong quan (`/`) hien Luong theo tung cong doan (Phat, Khai thac)
+  canh nhau, co bo loc theo Nam/Thang + Buu cuc.
 - Import du lieu tho hang ngay tu file `SanLuongChiTiet_DDMMYYYY.xlsx`
   (lenh `import_daily_production`), tu dong tinh lai "tam tinh" ngay sau
   khi import.
@@ -170,6 +173,8 @@ nhan thuoc Nhom EMS - DEC-018).
 TinhLuongCongDoan/
   payroll/            - settings, urls goc
   core/                - Nhan vien, Buu cuc, phan quyen (dung chung 4 cong doan)
+    views.py, urls.py, forms.py, context_processors.py
+    templates/          - base.html (khung sidebar chung) + Nhan vien + Tong quan
   phat/                - Module cong doan Phat
     models.py          - toan bo bang du lieu (xem plan de biet chi tiet)
     services/
@@ -201,9 +206,11 @@ TinhLuongCongDoan/
 python manage.py test
 ```
 
-10 test module Phat (co che phan quyen theo buu cuc, import file mau) + 6
-test module Khai thac (`compute_fund_breakdown`: don gia dung theo thoi
-diem hieu luc, Loai chua anh xa bi loai khoi tong, gop dung nhieu muc can
-vao 1 Loai; `compute_employee_shares`: chia dung theo He so ca, ap dung
-He so chat luong, dong chua khop ten van tinh vao tong nhung khong co
-nguoi nhan).
+21 test: `core` (co che phan quyen theo buu cuc - uu tien cao nhat, ca o
+muc queryset lan view - Nhan vien/Tong quan da chuyen sang day), `phat`
+(import file mau, va mot test chan lai loi that: Truong buu cuc tung bi
+crash trang Luong vi bo loc Buu cuc dung sai field_name), `khaithac`
+(`compute_fund_breakdown`: don gia dung theo thoi diem hieu luc, Loai
+chua anh xa bi loai khoi tong, gop dung nhieu muc can vao 1 Loai;
+`compute_employee_shares`: chia dung theo He so ca, ap dung He so chat
+luong, dong chua khop ten van tinh vao tong nhung khong co nguoi nhan).
