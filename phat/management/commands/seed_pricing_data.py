@@ -6,13 +6,16 @@ RouteGroupMapping/ServiceMapping, can cu vao 2 nguon du lieu that:
    (ma tuyen -> nhom gia, da xac minh khop 100% - 117/117 - voi
    ROUTE_PO_CODE that trong du lieu tho da import).
 2. Cac to hop SERVICE_NAME_PAYROLL/TYPE_CODE_PAYROLL/AREA_CODE/can nang
-   THAT xuat hien trong RawDailyProduction da import (ngay 26/08/2026,
-   6706 dong) - dung de xay quy tac ServiceMapping co can cu, KHONG
-   doan cho cac truong hop con mo (xem PROJECT_CONTEXT.md Section 6):
-   "C-Bao Phat", "Goi nho thuong", cac bien the "KT1 ...- B/C" chua ro
-   co phai KT1 ABC hay khong, va "KT1 Hoa toc Hen gio" (ket hop 2 thuoc
-   tinh, khong co danh muc rieng) - CO CHU DICH de trong, se hien trong
-   /bao-cao/chua-anh-xa/ cho Admin/TCHC xu ly.
+   THAT xuat hien trong du lieu tho da import - dung de xay quy tac
+   ServiceMapping co can cu, KHONG doan cho cac truong hop con mo (xem
+   PROJECT_CONTEXT.md Section 6). Cap nhat 2026-08-28: "KT1 A/B/C" va
+   "KT1 Hoa toc - B/C" da xac minh dung chung PriceCard voi "KT1 ABC"/
+   "KT1 Hoa Toc ABC" nen da them quy tac; con lai CO CHU DICH de trong:
+   "C-Bao Phat"/"M-Bao Phat" (chua ro San pham nay co ton tai qua dich vu
+   C/M khong), "Goi nho thuong", va "KT1 Hoa toc Hen gio" (cot rieng
+   trong file gia nhung GIA TRI=0 cho moi nhom - can PO/TCHC xac nhan co
+   phai chu dich khong truoc khi gan) - xem KNOWN_AMBIGUOUS_COMBINATIONS,
+   se hien trong /bao-cao/chua-anh-xa/ cho Admin/TCHC xu ly.
 
 Idempotent: chay lai nhieu lan an toan (dung update_or_create).
 """
@@ -52,6 +55,23 @@ SERVICE_MAPPING_RULES = [
     # KT1 hoa toc dung ten (khong co hau to ABC/-B/-C)
     ("KT1 Hỏa tốc", "KT1_HT", "NT", None, None, "KT1 Hỏa Tốc Nội tỉnh"),
     ("KT1 Hỏa tốc", "KT1_HT", "LT", None, None, "KT1 hỏa tốc liên tỉnh"),
+    # KT1 ABC: ten SP la "KT1 A"/"KT1 B"/"KT1 C" (chu cai hang), dung gia
+    # voi dong "KT1 ABC" - xac minh PriceCard: cung gia trinh tren 12 nhom
+    # voi "EMS hoa toc"/"KT1 Hoa Toc" (VB1054 trang 6, dong 10 gop chung).
+    ("KT1 A", "KT1_HT", "NT", None, None, "KT1 ABC Nội tỉnh"),
+    ("KT1 A", "KT1_HT", "LT", None, None, "KT1 ABC liên tỉnh"),
+    ("KT1 B", "KT1_HT", "NT", None, None, "KT1 ABC Nội tỉnh"),
+    ("KT1 B", "KT1_HT", "LT", None, None, "KT1 ABC liên tỉnh"),
+    ("KT1 C", "KT1_HT", "NT", None, None, "KT1 ABC Nội tỉnh"),
+    ("KT1 C", "KT1_HT", "LT", None, None, "KT1 ABC liên tỉnh"),
+    # KT1 Hoa toc ABC: hau to "- A"/"- B"/"- C" gan vao "KT1 Hoa toc" - cung
+    # dong gia voi "KT1 Hoa Toc"/"KT1 ABC" (da xac minh cung PriceCard).
+    ("KT1 Hỏa tốc - A", "KT1_HT", "NT", None, None, "KT1 Hỏa Tốc ABC Nội tỉnh"),
+    ("KT1 Hỏa tốc - A", "KT1_HT", "LT", None, None, "KT1 hỏa tốc ABC liên tỉnh"),
+    ("KT1 Hỏa tốc - B", "KT1_HT", "NT", None, None, "KT1 Hỏa Tốc ABC Nội tỉnh"),
+    ("KT1 Hỏa tốc - B", "KT1_HT", "LT", None, None, "KT1 hỏa tốc ABC liên tỉnh"),
+    ("KT1 Hỏa tốc - C", "KT1_HT", "NT", None, None, "KT1 Hỏa Tốc ABC Nội tỉnh"),
+    ("KT1 Hỏa tốc - C", "KT1_HT", "LT", None, None, "KT1 hỏa tốc ABC liên tỉnh"),
     # APP-Epacket
     ("L-AppEpacket", None, "QT", None, None, "APP-Epacket"),
     # C-Bưu kiện: KCOD (khong COD) - phan theo can nang
@@ -92,21 +112,29 @@ SERVICE_MAPPING_RULES = [
     ("E-EMS(trừ E-Báo phát và E-Hỏa tốc)", "DV_N_COD_GTGT", "LT", None, WEIGHT_2KG + 0.01, "EMS COD liên tỉnh >2kg"),
     # E-EMS(tru...) quoc te - khong phan COD/can nang (chua thay du lieu that phan biet)
     ("E-EMS(trừ E-Báo phát và E-Hỏa tốc)", None, "QT", None, None, "EMS Quốc tế"),
+    # C-Buu kien quoc te: khong phan biet can nang (giong cac San pham
+    # quoc te khac trong bang gia - chi 1 cot "Buu kien quoc te" duy nhat).
+    ("C-Bưu kiện", "DV_T_KCOD", "QT", None, None, "Bưu kiện quốc tế"),
 ]
 
 # Cac to hop THAT da xac nhan la con mo, CO CHU DICH khong tao quy tac -
 # se hien trong /bao-cao/chua-anh-xa/. Ghi lai o day de tra cuu, khong
 # dung de tao du lieu.
 KNOWN_AMBIGUOUS_COMBINATIONS = [
+    # "C-Bao Phat"/"M-Bao Phat": chua ro San pham "Bao Phat" co ton tai
+    # qua dich vu C/M hay khong - bang gia chi co "Bao phat R"/"Bao phat E".
     ("C-Báo Phát", "DV_T_KCOD", "LT"),
+    ("C-Báo Phát", "DV_T_KCOD", "NT"),
+    ("M-Báo Phát", "KT1", "LT"),
     ("Gói nhỏ thường", "BPBDQT", "QT"),
-    ("KT1 Hỏa tốc - C", "KT1_HT", "NT"),
-    ("KT1 C", "KT1_HT", "NT"),
-    ("KT1 C", "KT1_HT", "LT"),
-    ("KT1 Hỏa tốc - C", "KT1_HT", "LT"),
-    ("KT1 Hỏa tốc - B", "KT1_HT", "LT"),
-    ("KT1 B", "KT1_HT", "LT"),
+    # "KT1 Hoa toc Hen gio": file gia goc "CONG PHAT THANG 07.2026" co cot
+    # rieng "KT1 hen gio"/"KT1 hen gio ABC" NHUNG gia tri = 0 cho MOI nhom
+    # (xac minh truc tiep tu file Excel, khong phai loi seed) - khac han
+    # "KT1 Hoa Toc"/"KT1 Hoa Toc ABC" (cung ten "Hoa toc" nhung co gia that).
+    # Khong tu quyet dinh day co phai chu dich (dich vu mien phi) hay thieu
+    # sot cua file gia - can PO/TCHC xac nhan truoc khi gan.
     ("KT1 Hỏa tốc Hẹn giờ", "KT1_HT", "NT"),
+    ("KT1 Hỏa tốc Hẹn giờ - C", "KT1_HT", "NT"),
 ]
 
 
