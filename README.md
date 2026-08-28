@@ -46,6 +46,13 @@ ben duoi. Day la thiet ke co chu dich, tranh doan sai gia/anh xa.
 3. Dang nhap bang tai khoan admin da tao san (xem lich su thiet lap - neu
    quen mat khau, doi bang `python manage.py changepassword admin`).
 
+**QUAN TRONG**: `serve.py` (waitress) KHONG tu nap lai code moi khi co
+thay doi (khac `manage.py runserver` luc dev). Sau moi lan cap nhat code
+(vd `git pull`, them module moi), phai **tat cua so `run_app.bat`/
+`serve.py` dang chay va mo lai** thi thay doi moi co hieu luc tren may
+chu that. Du lieu (db.sqlite3) khong can lam gi them - doc/ghi truc tiep,
+khong can restart de thay du lieu moi.
+
 ### Chay thuong truc (khong can mo cua so lenh)
 
 Tao 1 Scheduled Task chay `serve.py` moi khi khoi dong may chu:
