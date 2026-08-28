@@ -7,7 +7,7 @@
   {% csrf_token %}
   {{ form.as_p }}
   <button class="btn" type="submit">Lưu</button>
-  <a class="btn secondary" href="{% url 'employee_list' %}">Hủy</a>
+  <a class="btn secondary" href="{% url 'employee_list' %}{% if instance %}?bc={{ instance.post_office.code }}{% endif %}">Hủy</a>
 </form>
 </div>
 {% endblock %}

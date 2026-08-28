@@ -76,7 +76,23 @@ class EmployeeScopingViewTests(TestCase):
         UserProfile.objects.create(
             user=self.truong_view_a, role=UserProfile.ROLE_TRUONG_BUU_CUC, post_office=self.po_a
         )
+        self.admin_view = User.objects.create_user("view_admin", password="x")
+        UserProfile.objects.create(user=self.admin_view, role=UserProfile.ROLE_ADMIN)
         self.client = Client()
+
+    def test_admin_employee_list_defaults_to_one_office_grouped(self):
+        # Yeu cau PO: gom theo tung buu cuc, chi hien lao dong thuoc buu
+        # cuc dang chon - khong con tron het cac buu cuc vao 1 danh sach.
+        self.client.login(username="view_admin", password="x")
+        resp = self.client.get(reverse("employee_list"))
+        self.assertContains(resp, "Nhan vien A")
+        self.assertNotContains(resp, "Nhan vien B")
+
+    def test_admin_employee_list_switches_office_via_bc_param(self):
+        self.client.login(username="view_admin", password="x")
+        resp = self.client.get(reverse("employee_list"), {"bc": self.po_b.code})
+        self.assertContains(resp, "Nhan vien B")
+        self.assertNotContains(resp, "Nhan vien A")
 
     def test_employee_list_only_shows_own_post_office(self):
         self.client.login(username="view_truong_a", password="x")

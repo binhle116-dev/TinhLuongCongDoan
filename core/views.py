@@ -81,8 +81,26 @@ def overview_dashboard(request):
 
 @login_required
 def employee_list(request):
+    office_choices = scope_post_office_choices(request.user).order_by("code")
+    selected_office = request.GET.get("bc", "")
+    forced_office = user_scope_post_office(request.user)
+    if forced_office is not None:
+        selected_office = forced_office.code
+    elif not selected_office:
+        first_office = office_choices.first()
+        selected_office = first_office.code if first_office else ""
+
     employees = scope_queryset(Employee.objects.select_related("post_office"), request.user)
-    return render(request, "employee_list.html", {"employees": employees})
+    if selected_office:
+        employees = employees.filter(post_office__code=selected_office)
+    employees = employees.order_by("full_name")
+
+    context = {
+        "employees": employees,
+        "office_choices": office_choices,
+        "selected_office": selected_office,
+    }
+    return render(request, "employee_list.html", context)
 
 
 @login_required
@@ -95,9 +113,9 @@ def employee_edit(request, pk=None):
     if request.method == "POST":
         form = EmployeeForm(request.POST, instance=instance, user=request.user)
         if form.is_valid():
-            form.save()
+            employee = form.save()
             messages.success(request, "Da luu thong tin nhan vien.")
-            return redirect("employee_list")
+            return redirect(f"/nhan-su/?bc={employee.post_office.code}")
     else:
         form = EmployeeForm(instance=instance, user=request.user)
     return render(request, "employee_form.html", {"form": form, "instance": instance})
