@@ -3,3 +3,5 @@ waitress
 django-import-export
 pandas
 openpyxl
+pyodbc
+pywin32

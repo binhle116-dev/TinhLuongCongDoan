@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block title %}Khai thác{% endblock %}
+{% block page_title %}Khai thác — Quỹ tiền lương theo ca/ngày{% endblock %}
+{% block content %}
+
+{% if not post_office %}
+<div class="warn">Không có bưu cục Khai thác nào trong phạm vi tài khoản của bạn.</div>
+{% elif not result %}
+<div class="warn">Chưa có dữ liệu sản lượng cho tháng {{ month }}/{{ year }}. Chạy lệnh
+<code>python manage.py import_khaithac_production --tu {{ year }}-{{ month|stringformat:"02d" }}-01 --den ...</code>.</div>
+{% else %}
+
+<div class="warn">
+  Đây là <b>Quỹ tiền lương thực hiện của đơn vị</b> (Sản lượng × Đơn giá theo VB1054/1182), theo đúng công thức
+  mục II.1 VB1054/TB-BĐHUE. Việc chia số tiền này cho từng nhân viên theo Hệ số ca làm việc (mục 1.3) cần Bảng
+  phân ca thực tế — <b>chưa có dữ liệu này</b>, nên trang này mới dừng ở mức tổng quỹ của bưu cục {{ post_office }}.
+</div>
+
+{% if result.unmapped_loai %}
+<div class="warn">
+  Có sản lượng <b>chưa được tính vào quỹ tiền lương</b> vì Loại chưa được ánh xạ vào Nhóm dịch vụ:
+  {% for loai, sl in result.unmapped_loai.items %}<b>{{ loai }}</b> ({{ sl }} cái){% if not forloop.last %}, {% endif %}{% endfor %}.
+  Xem <a href="{% url 'khaithac_unmatched_report' %}">trang chưa ánh xạ</a>.
+</div>
+{% endif %}
+
+<div class="stat-grid">
+  <div class="stat-tile"><div class="label">Quỹ tiền lương thực hiện (tháng {{ month }}/{{ year }})</div><div class="value">{{ result.tong_quy_tien_luong|floatformat:0 }}đ</div></div>
+  <div class="stat-tile"><div class="label">Sản lượng tính tiền</div><div class="value">{{ result.tong_san_luong_tinh_tien|floatformat:0 }}</div></div>
+  <div class="stat-tile"><div class="label">Bưu cục</div><div class="value">{{ post_office.code }}</div></div>
+</div>
+
+<h2>Theo Nhóm dịch vụ (cả tháng)</h2>
+<div class="table-wrap">
+<table>
+<thead><tr><th class="text">Nhóm dịch vụ</th><th>Sản lượng</th><th>Thành tiền</th></tr></thead>
+<tbody>
+{% for nhom, v in result.by_nhom_thang.items %}
+<tr><td class="text">{{ nhom }}</td><td>{{ v.so_luong }}</td><td>{{ v.thanh_tien|floatformat:0 }}đ</td></tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
+
+<h2>Theo ngày / ca</h2>
+<div class="table-wrap">
+<table>
+<thead><tr><th class="text">Ngày</th><th class="text">Ca 1</th><th class="text">Ca 2</th><th class="text">Ca 3</th><th>Tổng ngày</th></tr></thead>
+<tbody>
+{% for ngay, v in result.by_ngay.items %}
+<tr>
+  <td class="text">{{ ngay|date:"d/m/Y" }}</td>
+  <td class="text">{{ v.ca.CA1.so_luong|default:0 }} cái — {{ v.ca.CA1.thanh_tien|floatformat:0|default:0 }}đ</td>
+  <td class="text">{{ v.ca.CA2.so_luong|default:0 }} cái — {{ v.ca.CA2.thanh_tien|floatformat:0|default:0 }}đ</td>
+  <td class="text">{{ v.ca.CA3.so_luong|default:0 }} cái — {{ v.ca.CA3.thanh_tien|floatformat:0|default:0 }}đ</td>
+  <td>{{ v.thanh_tien|floatformat:0 }}đ</td>
+</tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
+
+{% endif %}
+{% endblock %}

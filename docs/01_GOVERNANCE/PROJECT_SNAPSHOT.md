@@ -17,9 +17,9 @@ session, second only to `README_AI.md`.
 
 | Field | Value |
 | --- | --- |
-| Current Phase | `Module Phát — Milestone 1 (MVP) COMPLETED. No further phase activated yet.` |
+| Current Phase | `Module Phát — Milestone 1 (MVP) COMPLETED. Module Khai thác — MVP (quỹ tiền lương theo ca/ngày ở mức đơn vị) COMPLETED; per-employee split NOT YET done (needs shift roster). See Section 4.` |
 | Current Ticket | `None — AWAITING PO DIRECTION` |
-| Next Ticket | `Not yet chosen by the Product Owner. Candidates: (a) resolve the remaining 56 unmatched postman codes / 44 employees without postman_code; (b) validate a full month's provisional total against a known-correct figure (needs a complete month of daily raw files, which does not exist yet); (c) formal PO UI Acceptance pass on Milestone 1 under this governance model; (d) start module Thu Gom. See Section 4.` |
+| Next Ticket | `Not yet chosen by the Product Owner. Candidates: (a) obtain the real Khai thác shift roster (bảng phân ca) so KhaiThacShiftAssignment can be populated and per-employee pay computed (DEC-016); (b) get PO/TCHC confirmation on which Nhóm dịch vụ 'KT1' (M-prefix) belongs to; (c) resolve the remaining 56 unmatched postman codes / 44 employees without postman_code (Phát); (d) formal PO UI Acceptance pass on both modules; (e) start module Thu Gom or Vận chuyển. See Section 4.` |
 | Last PO Status | `Product Owner has used Milestone 1 directly (logged into /admin/, explored roles) and raised no FAIL. No formal PO PASS has been recorded under PO_UI_ACCEPTANCE_WORKFLOW.md yet, since that document did not exist until this ticket.` |
 | Current Branch | `Not yet a Git repository — see Repository Status below.` |
 | Current Manifest | `None — no ticket-specific manifest exists yet under docs/10_TICKETS/.` |
@@ -37,7 +37,8 @@ session, second only to `README_AI.md`.
 | Last Closed Manifest | `None — Milestone 1 was executed before this manifest-driven governance model existed; its design record lives in the Claude Code plan history for this project, not in docs/10_TICKETS/.` |
 | Repository Status | `Git init + first commit + remote (https://github.com/binhle116-dev/TinhLuongCongDoan.git) authorized by Product Owner (DEC-007), being executed in this ticket. See Continuation Notes for the exact push confirmation step.` |
 | Governance Version | `V1 (this document set) — first created 2026-08-27, adapted from a prior project's multi-agent standard into a single-executor (Claude Code only) model. See PROJECT_DECISIONS.md DEC-001 through DEC-005.` |
-| Last Updated | `2026-08-27` |
+| Khai thác Module Status | `MVP shipped 2026-08-28 (DEC-016): new app khaithac, direct SQL Server import (BCCP530100_2024 + BCCP530900) replacing the Excel/SFTP pattern used by Phát. Quỹ tiền lương computed per VB1054+VB1182 (4 Nhóm dịch vụ, date-versioned pricing). KT1 (M-prefix) deliberately unmapped pending PO/TCHC confirmation. Per-employee split blocked on a real shift roster - not guessed.` |
+| Last Updated | `2026-08-28` |
 
 ## 3. Usage Rules
 
@@ -55,6 +56,35 @@ session, second only to `README_AI.md`.
 
 This section carries narrative context that the one-line
 `PROJECT_PROGRESS.md` entries can't — the "why", not just the "what".
+
+**2026-08-28 — Module Khai thác started (new app, new data-source
+pattern).** The Product Owner asked to start module Khai thác (buu cuc
+KTC1 Hue 1, ma `530100`) and offered SQL Server login directly, rather
+than a daily Excel/SFTP feed like Phát. Before writing any payroll logic,
+Claude Code first verified the T-SQL query the Product Owner supplied
+(month-scoped, grouped by ca/ngay/loai) against real July 2026 data — 31/31
+days present, no gaps, category totals internally consistent (~0.04%
+residual not classified into R/E/C/U). The Product Owner then corrected
+one data-source assumption: `KT1` (item codes starting `M`) is NOT in
+`BCCP530100_2024` (which only had ~2 items/month there — clearly wrong for
+a processing center this size) but in a *separate* database,
+`BCCP530900`, where the real volume (~2,135 items/month) was confirmed.
+Before writing pay logic, Claude Code also asked the Product Owner for (a)
+the actual unit-price table and (b) how pay is split among employees per
+shift — both genuinely unknown from the data. The Product Owner answered
+by pointing to two real internal documents already on disk (`VB 1054/TB-
+BĐHUE` and its amendment `VB 1182/TB-BĐHUE`), which gave both answers:
+piece-rate pricing by 4 Nhóm dịch vụ (EMS/GHI_SO/BUU_KIEN/PHBC, 2 rate
+periods in 2026), and a Hệ số ca formula for splitting the resulting fund
+across employees (1.0/ca standard, 1.2/ca for a shift lead, quality
+coefficient from a "Phụ lục 01" that does not exist in the file Claude Code
+has access to). The MVP shipped everything computable from real data
+today (raw import, Nhóm mapping, the priced monthly/daily/shift fund
+total) and stopped short of the per-employee split, since that requires a
+real shift roster (who worked which ca, which days, who was shift lead)
+that does not exist yet in any file Claude Code has seen — this mirrors
+the same "don't guess" principle used for Phát's `ServiceMapping` (DEC-005)
+and is recorded as `DEC-016`.
 
 **2026-08-27 — Governance document set created.** The Product Owner
 asked to replicate an AI-collaboration documentation standard from a

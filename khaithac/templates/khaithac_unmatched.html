@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}Khai thác — Chưa ánh xạ{% endblock %}
+{% block page_title %}Khai thác — Loại chưa ánh xạ vào Nhóm dịch vụ{% endblock %}
+{% block content %}
+<p class="note">Sửa qua Trang quản trị → Anh xa Loai -> Nhom dich vu Khai thac. Loại chưa ánh xạ sẽ
+KHÔNG được tính vào Quỹ tiền lương cho tới khi được xác nhận (tránh đoán bừa Nhóm dịch vụ).</p>
+
+<h2>Chưa ánh xạ ({{ unmapped|length }})</h2>
+<div class="table-wrap">
+<table>
+<thead><tr><th class="text">Loại (raw)</th><th class="text">Ghi chú</th></tr></thead>
+<tbody>
+{% for m in unmapped %}
+<tr><td class="text">{{ m.loai_raw }}</td><td class="text">{{ m.note }}</td></tr>
+{% empty %}
+<tr><td colspan="2" class="text"><i>Không có — tất cả đã ánh xạ.</i></td></tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
+
+<h2>Đã ánh xạ ({{ mapped|length }})</h2>
+<div class="table-wrap">
+<table>
+<thead><tr><th class="text">Loại (raw)</th><th class="text">Nhóm dịch vụ</th></tr></thead>
+<tbody>
+{% for m in mapped %}
+<tr><td class="text">{{ m.loai_raw }}</td><td class="text">{{ m.get_nhom_dich_vu_display }}</td></tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
+{% endblock %}

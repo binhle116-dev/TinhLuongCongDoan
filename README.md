@@ -109,6 +109,47 @@ Sau khi dien du 3 bang tren, chay lai `python manage.py import_daily_production`
 (hoac doi lan import ke tiep) la so lieu se tu tinh dung, khong can sua
 code.
 
+## Module Khai thac (buu cuc KTC1 Hue 1, ma 530100)
+
+Khac Phat (doc file Excel), module nay ket noi TRUC TIEP toi SQL Server
+cua phan mem BCCP (2 database: `BCCP530100_2024` va `BCCP530900` cho rieng
+Loai KT1 - xem `docs/01_GOVERNANCE/PROJECT_DECISIONS.md` DEC-016).
+
+**Thiet lap mat khau SQL Server (chi lam 1 lan, tu may cua ban - KHONG ai
+khac duoc go ho mat khau nay, ke ca AI):**
+
+```powershell
+$cred = Get-Credential -UserName sa
+$cred.Password | ConvertFrom-SecureString | Set-Content "$env:USERPROFILE\.khaithac_sql_pw.txt"
+```
+
+File nay chi giai ma duoc tren dung may + dung user Windows da tao no
+(Windows DPAPI), khong the copy sang may khac.
+
+**Import du lieu (tung thang mot):**
+
+```bash
+python manage.py import_khaithac_production --tu 2026-07-01 --den 2026-08-01
+```
+
+**Seed lai don gia/anh xa** (chi can chay lai neu VB1054/VB1182 duoc thay
+the boi 1 van ban dieu chinh moi, hoac them Nhom dich vu moi):
+
+```bash
+python manage.py seed_khaithac_pricing
+```
+
+Xem ket qua tai `/khai-thac/` (Quy tien luong theo ca/ngay/thang) va
+`/khai-thac/chua-anh-xa/` (Loai chua duoc xac dinh Nhom dich vu - hien tai
+la `KT1`, can PO/TCHC xac nhan).
+
+**QUAN TRONG - chua lam xong**: cong thuc chia Quy tien luong cho tung
+nhan vien theo He so ca lam viec (VB1054 muc 1.3) CAN mot Bang phan ca
+thuc te (ai truc Ca nao, ngay nao, co la Truong ca khong) ma hien **CHUA
+CO du lieu nay** - khong duoc doan. Model `KhaiThacShiftAssignment` va
+`KhaiThacQualityCoefficient` da tao san, sua qua `/admin/` khi co du lieu
+that.
+
 ## Cau truc du an
 
 ```
@@ -125,6 +166,15 @@ TinhLuongCongDoan/
       seed_reference_data.py  - tao san danh muc khoan ho tro
       backup_db.py
     views.py, urls.py, forms.py, admin.py, templates/
+  khaithac/            - Module cong doan Khai thac (buu cuc 530100)
+    models.py          - du lieu tho theo ca/ngay, anh xa Nhom, don gia, phan ca
+    services/
+      sql_source.py     - ket noi SQL Server (giai ma mat khau DPAPI trong bo nho)
+      pricing.py         - tinh Quy tien luong theo VB1054/1182
+    management/commands/
+      import_khaithac_production.py
+      seed_khaithac_pricing.py
+    views.py, urls.py, admin.py, templates/
   serve.py             - chay production bang waitress
   run_app.bat          - bam dup de chay thu tren Windows
   requirements.txt
@@ -136,6 +186,7 @@ TinhLuongCongDoan/
 python manage.py test
 ```
 
-10 test: co che phan quyen theo buu cuc (uu tien cao nhat, kiem ca o muc
-queryset lan view), import file mau (so dong dung, import lai khong
-trung).
+10 test module Phat (co che phan quyen theo buu cuc, import file mau) + 3
+test module Khai thac (`compute_fund_breakdown`: don gia dung theo thoi
+diem hieu luc, Loai chua anh xa bi loai khoi tong, gop dung nhieu muc can
+vao 1 Loai).

@@ -196,11 +196,18 @@ input, select { padding: 5px 8px; }
     {% endif %}
   </ul>
 
+  <div class="sidebar-section">Công đoạn Khai thác</div>
+  <ul class="sidebar-nav">
+    <li><a href="{% url 'khaithac_dashboard' %}" class="{% if request.resolver_match.url_name == 'khaithac_dashboard' or request.resolver_match.url_name == 'khaithac_dashboard_month' %}active{% endif %}"><span class="icon">&#127981;</span> Quỹ tiền lương</a></li>
+    {% if request.user.is_superuser or request.user.profile.role == 'ADMIN' %}
+    <li><a href="{% url 'khaithac_unmatched_report' %}" class="{% if request.resolver_match.url_name == 'khaithac_unmatched_report' %}active{% endif %}"><span class="icon">&#9888;</span> Chưa ánh xạ</a></li>
+    {% endif %}
+  </ul>
+
   <div class="sidebar-section">Công đoạn khác</div>
   <ul class="sidebar-nav">
     <li><span class="disabled"><span class="icon">&#128230;</span> Thu Gom (sắp có)</span></li>
     <li><span class="disabled"><span class="icon">&#128666;</span> Vận chuyển (sắp có)</span></li>
-    <li><span class="disabled"><span class="icon">&#127981;</span> Khai thác (sắp có)</span></li>
   </ul>
 
   {% if request.user.is_superuser or request.user.profile.role == 'ADMIN' %}
